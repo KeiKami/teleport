@@ -255,8 +255,7 @@ func testAuditOn(t *testing.T, suite *integrationTestSuite) {
 		t.Run(tt.comment, func(t *testing.T) {
 			makeConfig := func() (*testing.T, []string, []*InstanceSecrets, *service.Config) {
 				clusterConfig, err := services.NewClusterConfig(services.ClusterConfigSpecV3{
-					Audit:     services.AuditConfig{AuditSessionsURI: tt.auditSessionsURI},
-					LocalAuth: services.NewBool(true),
+					Audit: services.AuditConfig{AuditSessionsURI: tt.auditSessionsURI},
 				})
 				require.NoError(t, err)
 
@@ -1164,11 +1163,6 @@ func runDisconnectTest(t *testing.T, suite *integrationTestSuite, tc disconnectT
 	require.NoError(t, err)
 	teleport.AddUserWithRole(username, role)
 
-	clusterConfig, err := services.NewClusterConfig(services.ClusterConfigSpecV3{
-		LocalAuth: services.NewBool(true),
-	})
-	require.NoError(t, err)
-
 	netConfig, err := types.NewClusterNetworkingConfigFromConfigFile(types.ClusterNetworkingConfigSpecV2{
 		SessionControlTimeout: services.Duration(tc.sessCtlTimeout),
 	})
@@ -1181,7 +1175,6 @@ func runDisconnectTest(t *testing.T, suite *integrationTestSuite, tc disconnectT
 
 	cfg := suite.defaultServiceConfig()
 	cfg.Auth.Enabled = true
-	cfg.Auth.ClusterConfig = clusterConfig
 	cfg.Auth.NetworkingConfig = netConfig
 	cfg.Auth.SessionRecordingConfig = recConfig
 	cfg.Proxy.DisableWebService = true

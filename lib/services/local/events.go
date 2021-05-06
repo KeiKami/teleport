@@ -70,7 +70,7 @@ func (e *EventsService) NewWatcher(ctx context.Context, watch services.Watch) (s
 		case types.KindClusterNetworkingConfig:
 			parser = newClusterNetworkingConfigParser()
 		case types.KindClusterAuthPreference:
-			parser = newAuthPreferenceParser()
+			parser = newAuthPreferenceParser(e.getClusterConfig)
 		case types.KindSessionRecordingConfig:
 			parser = newSessionRecordingConfigParser()
 		case services.KindClusterName:
@@ -365,6 +365,7 @@ func newClusterConfigParser(getClusterConfig getClusterConfigFunc) *clusterConfi
 		backend.Key(clusterConfigPrefix, generalPrefix),
 		backend.Key(clusterConfigPrefix, networkingPrefix),
 		backend.Key(clusterConfigPrefix, sessionRecordingPrefix),
+		backend.Key(authPrefix, preferencePrefix, generalPrefix),
 	}
 	return &clusterConfigParser{
 		baseParser:       newBaseParser(prefixes...),
@@ -438,7 +439,7 @@ func (p *clusterNetworkingConfigParser) parse(event backend.Event) (services.Res
 	}
 }
 
-func newAuthPreferenceParser() *authPreferenceParser {
+func newAuthPreferenceParser(getClusterConfig getClusterConfigFunc) *authPreferenceParser {
 	return &authPreferenceParser{
 		baseParser: newBaseParser(backend.Key(authPrefix, preferencePrefix, generalPrefix)),
 	}

@@ -101,18 +101,18 @@ func (s ForwarderSuite) TestRequestCertificate(c *check.C) {
 func TestAuthenticate(t *testing.T) {
 	t.Parallel()
 
-	cc, err := services.NewClusterConfig(services.ClusterConfigSpecV3{
-		DisconnectExpiredCert: true,
-	})
-	require.NoError(t, err)
 	nc, err := types.NewClusterNetworkingConfigFromConfigFile(types.ClusterNetworkingConfigSpecV2{
 		ClientIdleTimeout: services.NewDuration(time.Hour),
 	})
 	require.NoError(t, err)
+	authPref, err := services.NewAuthPreference(services.AuthPreferenceSpecV2{
+		DisconnectExpiredCert: services.NewBoolOption(true),
+	})
+	require.NoError(t, err)
 	ap := &mockAccessPoint{
-		clusterConfig:   cc,
 		netConfig:       nc,
 		recordingConfig: types.DefaultSessionRecordingConfig(),
+		authPref:        authPref,
 	}
 
 	user, err := services.NewUser("user-a")
@@ -763,15 +763,11 @@ func (s mockRemoteSite) GetName() string { return s.name }
 type mockAccessPoint struct {
 	auth.AccessPoint
 
-	clusterConfig   services.ClusterConfig
 	netConfig       types.ClusterNetworkingConfig
 	recordingConfig types.SessionRecordingConfig
+	authPref        services.AuthPreference
 	kubeServices    []services.Server
 	cas             map[string]types.CertAuthority
-}
-
-func (ap mockAccessPoint) GetClusterConfig(...services.MarshalOption) (services.ClusterConfig, error) {
-	return ap.clusterConfig, nil
 }
 
 func (ap mockAccessPoint) GetClusterNetworkingConfig(context.Context, ...services.MarshalOption) (types.ClusterNetworkingConfig, error) {
@@ -780,6 +776,10 @@ func (ap mockAccessPoint) GetClusterNetworkingConfig(context.Context, ...service
 
 func (ap mockAccessPoint) GetSessionRecordingConfig(context.Context, ...services.MarshalOption) (types.SessionRecordingConfig, error) {
 	return ap.recordingConfig, nil
+}
+
+func (ap mockAccessPoint) GetAuthPreference() (services.AuthPreference, error) {
+	return ap.authPref, nil
 }
 
 func (ap mockAccessPoint) GetKubeServices(ctx context.Context) ([]services.Server, error) {

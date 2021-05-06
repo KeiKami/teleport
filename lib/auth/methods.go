@@ -208,7 +208,7 @@ func (s *Server) authenticateUser(ctx context.Context, req AuthenticateUserReque
 // if authentication is successful. In case the existing session ID is used to authenticate,
 // returns the existing session instead of creating a new one
 func (s *Server) AuthenticateWebUser(req AuthenticateUserRequest) (services.WebSession, error) {
-	clusterConfig, err := s.GetClusterConfig()
+	authPref, err := s.GetAuthPreference()
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
@@ -217,7 +217,7 @@ func (s *Server) AuthenticateWebUser(req AuthenticateUserRequest) (services.WebS
 	// except session ID renewal requests that are using the same method.
 	// This condition uses Session as a blanket check, because any new method added
 	// to the local auth will be disabled by default.
-	if !clusterConfig.GetLocalAuth() && req.Session == nil {
+	if !authPref.GetAllowLocalAuth() && req.Session == nil {
 		s.emitNoLocalAuthEvent(req.Username)
 		return nil, trace.AccessDenied(noLocalAuth)
 	}
@@ -339,11 +339,11 @@ func AuthoritiesToTrustedCerts(authorities []services.CertAuthority) []TrustedCe
 // AuthenticateSSHUser authenticates an SSH user and returns SSH and TLS
 // certificates for the public key in req.
 func (s *Server) AuthenticateSSHUser(req AuthenticateSSHRequest) (*SSHLoginResponse, error) {
-	clusterConfig, err := s.GetClusterConfig()
+	authPref, err := s.GetAuthPreference()
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	if !clusterConfig.GetLocalAuth() {
+	if !authPref.GetAllowLocalAuth() {
 		s.emitNoLocalAuthEvent(req.Username)
 		return nil, trace.AccessDenied(noLocalAuth)
 	}

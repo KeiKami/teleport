@@ -161,8 +161,6 @@ audit_events_uri: 'dynamodb://audit_table_name'
 func (s *ClusterConfigurationSuite) TestClusterConfigMarshal(c *check.C) {
 	// signle audit_events uri value
 	clusterConfig, err := services.NewClusterConfig(services.ClusterConfigSpecV3{
-		DisconnectExpiredCert: services.NewBool(true),
-		ClusterID:             "27",
 		Audit: services.AuditConfig{
 			Region:           "us-west-1",
 			Type:             "dynamodb",
@@ -182,8 +180,6 @@ func (s *ClusterConfigurationSuite) TestClusterConfigMarshal(c *check.C) {
 
 	// multiple events uri values
 	clusterConfig, err = services.NewClusterConfig(services.ClusterConfigSpecV3{
-		DisconnectExpiredCert: services.NewBool(true),
-		ClusterID:             "27",
 		Audit: services.AuditConfig{
 			Region:           "us-west-1",
 			Type:             "dynamodb",

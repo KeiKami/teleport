@@ -164,7 +164,7 @@ auth_service:
   disconnect_expired_cert: %v
 `, tc.s))))
 		require.NoError(t, err, msg)
-		require.Equal(t, tc.b, conf.Auth.DisconnectExpiredCert.Value(), msg)
+		require.Equal(t, tc.b, conf.Auth.DisconnectExpiredCert.Value, msg)
 	}
 }
 
@@ -239,7 +239,7 @@ func TestConfigReading(t *testing.T) {
 				ListenAddress:  "tcp://auth",
 			},
 			LicenseFile:           "lic.pem",
-			DisconnectExpiredCert: services.Bool(true),
+			DisconnectExpiredCert: services.NewBoolOption(true),
 			ClientIdleTimeout:     services.Duration(17 * time.Second),
 		},
 		SSH: SSH{
@@ -511,7 +511,7 @@ func TestApplyConfig(t *testing.T) {
 		},
 	}), cfg.Auth.StaticTokens.GetStaticTokens())
 	require.Equal(t, "magadan", cfg.Auth.ClusterName.GetClusterName())
-	require.True(t, cfg.Auth.ClusterConfig.GetLocalAuth())
+	require.True(t, cfg.Auth.Preference.GetAllowLocalAuth())
 	require.Equal(t, "10.10.10.1", cfg.AdvertiseIP)
 
 	require.True(t, cfg.Proxy.Enabled)
@@ -563,6 +563,8 @@ SREzU8onbBsjMg9QDiSf5oJLKvd/Ren+zGY7
 `,
 				},
 			},
+			AllowLocalAuth:        types.NewBoolOption(true),
+			DisconnectExpiredCert: types.NewBoolOption(false),
 		},
 	}))
 }
@@ -846,7 +848,7 @@ func checkStaticConfig(t *testing.T, conf *FileConfig) {
 			"auth.default.svc.cluster.local:3080",
 		},
 		ClientIdleTimeout:     services.Duration(17 * time.Second),
-		DisconnectExpiredCert: true,
+		DisconnectExpiredCert: services.NewBoolOption(true),
 	}, cmp.AllowUnexported(Service{})))
 
 	policy, err := conf.CachePolicy.Parse()
@@ -909,7 +911,7 @@ func makeConfigFixture() string {
 	conf.Auth.ListenAddress = "tcp://auth"
 	conf.Auth.LicenseFile = "lic.pem"
 	conf.Auth.ClientIdleTimeout = services.NewDuration(17 * time.Second)
-	conf.Auth.DisconnectExpiredCert = services.NewBool(true)
+	conf.Auth.DisconnectExpiredCert = services.NewBoolOption(true)
 
 	// ssh service:
 	conf.SSH.EnabledFlag = "true"
