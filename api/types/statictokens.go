@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gravitational/teleport/api/defaults"
-
 	"github.com/gravitational/trace"
 )
 
@@ -39,20 +37,16 @@ type StaticTokens interface {
 
 // NewStaticTokens is a convenience wrapper to create a StaticTokens resource.
 func NewStaticTokens(spec StaticTokensSpecV2) (StaticTokens, error) {
-	st := StaticTokensV2{
-		Kind:    KindStaticTokens,
-		Version: V2,
+	st := &StaticTokensV2{
 		Metadata: Metadata{
-			Name:      MetaNameStaticTokens,
-			Namespace: defaults.Namespace,
+			Name: MetaNameStaticTokens,
 		},
 		Spec: spec,
 	}
 	if err := st.CheckAndSetDefaults(); err != nil {
 		return nil, trace.Wrap(err)
 	}
-
-	return &st, nil
+	return st, nil
 }
 
 // GetVersion returns resource version
@@ -127,17 +121,18 @@ func (c *StaticTokensV2) GetStaticTokens() []ProvisionToken {
 	return ProvisionTokensFromV1(c.Spec.StaticTokens)
 }
 
+// setStaticFields sets static resource header and metadata fields.
+func (c *StaticTokensV2) setStaticFields() {
+	c.Kind = KindStaticTokens
+	c.Version = V2
+}
+
 // CheckAndSetDefaults checks validity of all parameters and sets defaults.
 func (c *StaticTokensV2) CheckAndSetDefaults() error {
-	// make sure we have defaults for all metadata fields
-	err := c.Metadata.CheckAndSetDefaults()
-	if err != nil {
+	c.setStaticFields()
+	if err := c.Metadata.CheckAndSetDefaults(); err != nil {
 		return trace.Wrap(err)
 	}
-	if c.Version == "" {
-		c.Version = V2
-	}
-
 	return nil
 }
 

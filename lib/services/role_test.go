@@ -2092,12 +2092,24 @@ func TestBoolOptions(t *testing.T) {
 }
 
 func TestCheckAccessToDatabase(t *testing.T) {
-	dbStage := types.NewDatabaseServerV3("stage",
+	dbStage, err := types.NewDatabaseServerV3("stage",
 		map[string]string{"env": "stage"},
-		types.DatabaseServerSpecV3{})
-	dbProd := types.NewDatabaseServerV3("prod",
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
+	dbProd, err := types.NewDatabaseServerV3("prod",
 		map[string]string{"env": "prod"},
-		types.DatabaseServerSpecV3{})
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
 	roleDevStage := &RoleV3{
 		Metadata: Metadata{Name: "dev-stage", Namespace: defaults.Namespace},
 		Spec: RoleSpecV3{
@@ -2249,12 +2261,24 @@ func TestCheckAccessToDatabase(t *testing.T) {
 }
 
 func TestCheckAccessToDatabaseUser(t *testing.T) {
-	dbStage := types.NewDatabaseServerV3("stage",
+	dbStage, err := types.NewDatabaseServerV3("stage",
 		map[string]string{"env": "stage"},
-		types.DatabaseServerSpecV3{})
-	dbProd := types.NewDatabaseServerV3("prod",
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
+	dbProd, err := types.NewDatabaseServerV3("prod",
 		map[string]string{"env": "prod"},
-		types.DatabaseServerSpecV3{})
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
 	roleDevStage := &RoleV3{
 		Metadata: Metadata{Name: "dev-stage", Namespace: defaults.Namespace},
 		Spec: RoleSpecV3{
@@ -2417,22 +2441,44 @@ func TestCheckDatabaseNamesAndUsers(t *testing.T) {
 }
 
 func TestCheckAccessToDatabaseService(t *testing.T) {
-	dbNoLabels := types.NewDatabaseServerV3("test",
+	dbNoLabels, err := types.NewDatabaseServerV3("test",
 		nil,
-		types.DatabaseServerSpecV3{})
-	dbStage := types.NewDatabaseServerV3("stage",
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
+	dbStage, err := types.NewDatabaseServerV3("stage",
 		map[string]string{"env": "stage"},
 		types.DatabaseServerSpecV3{
+			Protocol:      "protocol",
+			URI:           "uri",
+			Hostname:      "hostname",
+			HostID:        "host_id",
 			DynamicLabels: map[string]CommandLabelV2{"arch": {Result: "x86"}},
 		})
-	dbStage2 := types.NewDatabaseServerV3("stage2",
+	require.NoError(t, err)
+	dbStage2, err := types.NewDatabaseServerV3("stage2",
 		map[string]string{"env": "stage"},
 		types.DatabaseServerSpecV3{
+			Protocol:      "protocol",
+			URI:           "uri",
+			Hostname:      "hostname",
+			HostID:        "host_id",
 			DynamicLabels: map[string]CommandLabelV2{"arch": {Result: "amd64"}},
 		})
-	dbProd := types.NewDatabaseServerV3("prod",
+	require.NoError(t, err)
+	dbProd, err := types.NewDatabaseServerV3("prod",
 		map[string]string{"env": "prod"},
-		types.DatabaseServerSpecV3{})
+		types.DatabaseServerSpecV3{
+			Protocol: "protocol",
+			URI:      "uri",
+			Hostname: "hostname",
+			HostID:   "host_id",
+		})
+	require.NoError(t, err)
 	roleAdmin := &RoleV3{
 		Metadata: Metadata{Name: "admin", Namespace: defaults.Namespace},
 		Spec: RoleSpecV3{

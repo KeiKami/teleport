@@ -121,18 +121,14 @@ type Role interface {
 // NewRole constructs new standard role
 func NewRole(name string, spec RoleSpecV3) (Role, error) {
 	role := RoleV3{
-		Kind:    KindRole,
-		Version: V3,
 		Metadata: Metadata{
-			Name:      name,
-			Namespace: defaults.Namespace,
+			Name: name,
 		},
 		Spec: spec,
 	}
 	if err := role.CheckAndSetDefaults(); err != nil {
 		return nil, trace.Wrap(err)
 	}
-
 	return &role, nil
 }
 
@@ -495,14 +491,17 @@ func (r *RoleV3) SetRules(rct RoleConditionType, in []Rule) {
 	}
 }
 
+// setStaticFields sets static resource header and metadata fields.
+func (r *RoleV3) setStaticFields() {
+	r.Kind = KindRole
+	r.Version = V3
+}
+
 // CheckAndSetDefaults checks validity of all parameters and sets defaults
 func (r *RoleV3) CheckAndSetDefaults() error {
-	err := r.Metadata.CheckAndSetDefaults()
-	if err != nil {
+	r.setStaticFields()
+	if err := r.Metadata.CheckAndSetDefaults(); err != nil {
 		return trace.Wrap(err)
-	}
-	if r.Version == "" {
-		r.Version = V3
 	}
 
 	// Make sure all fields have defaults.

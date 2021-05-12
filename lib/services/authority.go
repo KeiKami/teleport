@@ -57,7 +57,7 @@ func NewJWTAuthority(clusterName string) (CertAuthority, error) {
 		Type:        types.JWTSigner,
 		ClusterName: clusterName,
 		JWTKeyPairs: []JWTKeyPair{keyPair},
-	}), nil
+	})
 }
 
 // NewCertAuthority returns new cert authority.
@@ -71,7 +71,7 @@ func NewCertAuthority(
 	roles []string,
 	signingAlg CertAuthoritySpecV2_SigningAlgType,
 ) CertAuthority {
-	return types.NewCertAuthority(types.CertAuthoritySpecV2{
+	ca, _ := types.NewCertAuthority(types.CertAuthoritySpecV2{
 		Type:         caType,
 		ClusterName:  clusterName,
 		SigningKeys:  signingKeys,
@@ -79,6 +79,7 @@ func NewCertAuthority(
 		Roles:        roles,
 		SigningAlg:   signingAlg,
 	})
+	return ca
 }
 
 // ValidateCertAuthority validates the CertAuthority

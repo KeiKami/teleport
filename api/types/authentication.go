@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport/api/constants"
-	"github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/utils/tlsutils"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -83,40 +82,23 @@ func NewAuthPreferenceFromConfigFile(spec AuthPreferenceSpecV2) (AuthPreference,
 // NewAuthPreferenceWithLabels is a convenience method to create
 // AuthPreferenceV2 with a specific map of labels.
 func newAuthPreferenceWithLabels(spec AuthPreferenceSpecV2, labels map[string]string) (AuthPreference, error) {
-	pref := AuthPreferenceV2{
-		Kind:    KindClusterAuthPreference,
-		Version: V2,
+	pref := &AuthPreferenceV2{
 		Metadata: Metadata{
-			Name:      MetaNameClusterAuthPreference,
-			Namespace: defaults.Namespace,
-			Labels:    labels,
+			Labels: labels,
 		},
 		Spec: spec,
 	}
-
 	if err := pref.CheckAndSetDefaults(); err != nil {
 		return nil, trace.Wrap(err)
 	}
-	return &pref, nil
+	return pref, nil
 }
 
 // DefaultAuthPreference returns the default authentication preferences.
 func DefaultAuthPreference() AuthPreference {
-	return &AuthPreferenceV2{
-		Kind:    KindClusterAuthPreference,
-		Version: V2,
-		Metadata: Metadata{
-			Name:      MetaNameClusterAuthPreference,
-			Namespace: defaults.Namespace,
-			Labels: map[string]string{
-				OriginLabel: OriginDefaults,
-			},
-		},
-		Spec: AuthPreferenceSpecV2{
-			Type:         constants.Local,
-			SecondFactor: constants.SecondFactorOTP,
-		},
-	}
+	labels := map[string]string{OriginLabel: OriginDefaults}
+	pref, _ := newAuthPreferenceWithLabels(AuthPreferenceSpecV2{}, labels)
+	return pref
 }
 
 // GetVersion returns resource version.
@@ -242,23 +224,25 @@ func (c *AuthPreferenceV2) GetRequireSessionMFA() bool {
 	return c.Spec.RequireSessionMFA
 }
 
-// CheckAndSetDefaults verifies the constraints for AuthPreference.
-func (c *AuthPreferenceV2) CheckAndSetDefaults() error {
-	// make sure we have defaults for all metadata fields
-	err := c.Metadata.CheckAndSetDefaults()
-	if err != nil {
-		return trace.Wrap(err)
+// setStaticFields sets static resource header and metadata fields.
+func (c *AuthPreferenceV2) setStaticFields() {
+	c.Kind = KindClusterAuthPreference
+	c.Version = V2
+	if c.Metadata.Name == "" {
+		c.Metadata.Name = MetaNameClusterAuthPreference
 	}
-	if c.Version == "" {
-		c.Version = V2
-	}
-
-	// Make sure origin value is always set.
 	if c.Origin() == "" {
 		c.SetOrigin(OriginDynamic)
 	}
+}
 
-	// if nothing is passed in, set defaults
+// CheckAndSetDefaults verifies the constraints for AuthPreference.
+func (c *AuthPreferenceV2) CheckAndSetDefaults() error {
+	c.setStaticFields()
+	if err := c.Metadata.CheckAndSetDefaults(); err != nil {
+		return trace.Wrap(err)
+	}
+
 	if c.Spec.Type == "" {
 		c.Spec.Type = constants.Local
 	}

@@ -307,7 +307,12 @@ func Init(cfg InitConfig, opts ...ServerOption) (*Server, error) {
 	}
 
 	// always create the default namespace
-	err = asrv.UpsertNamespace(services.NewNamespace(defaults.Namespace))
+	namespace, err := services.NewNamespace(defaults.Namespace)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+
+	err = asrv.UpsertNamespace(namespace)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}

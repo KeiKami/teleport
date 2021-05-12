@@ -1709,7 +1709,12 @@ func (a *Server) NewWebSession(req types.NewWebSessionRequest) (services.WebSess
 		LoginTime:          req.LoginTime,
 	}
 	UserLoginCount.Inc()
-	return services.NewWebSession(token, services.KindWebSession, services.KindWebSession, sessionSpec), nil
+
+	sess, err := services.NewWebSession(token, services.KindWebSession, services.KindWebSession, sessionSpec)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	return sess, nil
 }
 
 // GetWebSessionInfo returns the web session specified with sessionID for the given user.
@@ -2411,10 +2416,13 @@ func (a *Server) upsertWebSession(ctx context.Context, user string, session serv
 	if err := a.WebSessions().Upsert(ctx, session); err != nil {
 		return trace.Wrap(err)
 	}
-	token := types.NewWebToken(session.GetBearerTokenExpiryTime(), types.WebTokenSpecV3{
+	token, err := types.NewWebToken(session.GetBearerTokenExpiryTime(), types.WebTokenSpecV3{
 		User:  session.GetUser(),
 		Token: session.GetBearerToken(),
 	})
+	if err != nil {
+		return trace.Wrap(err)
+	}
 	if err := a.WebTokens().Upsert(ctx, token); err != nil {
 		return trace.Wrap(err)
 	}

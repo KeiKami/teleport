@@ -668,7 +668,7 @@ func TestMigrateOSS(t *testing.T) {
 		err := as.CreateRole(services.NewAdminRole())
 		require.NoError(t, err)
 
-		connector := types.NewGithubConnector("github", types.GithubConnectorSpecV3{
+		connector, err := types.NewGithubConnector("github", types.GithubConnectorSpecV3{
 			ClientID:     "aaa",
 			ClientSecret: "bbb",
 			RedirectURL:  "https://localhost:3080/v1/webapi/github/callback",
@@ -689,6 +689,7 @@ func TestMigrateOSS(t *testing.T) {
 				},
 			},
 		})
+		require.NoError(t, err)
 
 		err = as.CreateGithubConnector(connector)
 		require.NoError(t, err)

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/services"
 
@@ -43,46 +44,46 @@ func TestRemoteClusterTunnelManagerSync(t *testing.T) {
 		{
 			desc: "one reverse tunnel with one address",
 			reverseTunnels: []services.ReverseTunnel{
-				services.NewReverseTunnel("cluster-a", []string{"addr-a"}),
+				mustNewReverseTunnel("cluster-a", []string{"addr-a"}),
 			},
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
+				{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
 			},
 			assertErr: require.NoError,
 		},
 		{
 			desc: "one reverse tunnel added with multiple addresses",
 			reverseTunnels: []services.ReverseTunnel{
-				services.NewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
+				mustNewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
 			},
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
+				{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
+				{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
 			},
 			assertErr: require.NoError,
 		},
 		{
 			desc: "one reverse tunnel added and one removed",
 			reverseTunnels: []services.ReverseTunnel{
-				services.NewReverseTunnel("cluster-b", []string{"addr-b"}),
+				mustNewReverseTunnel("cluster-b", []string{"addr-b"}),
 			},
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
 			},
 			assertErr: require.NoError,
 		},
 		{
 			desc: "multiple reverse tunnels",
 			reverseTunnels: []services.ReverseTunnel{
-				services.NewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
-				services.NewReverseTunnel("cluster-b", []string{"addr-b"}),
+				mustNewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
+				mustNewReverseTunnel("cluster-b", []string{"addr-b"}),
 			},
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
-				remoteClusterKey{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
+				{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
+				{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
 			},
 			assertErr: require.NoError,
 		},
@@ -90,26 +91,26 @@ func TestRemoteClusterTunnelManagerSync(t *testing.T) {
 			desc:              "GetReverseTunnels error, keep existing pools",
 			reverseTunnelsErr: errors.New("nah"),
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
-				remoteClusterKey{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
+				{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
+				{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
 			},
 			assertErr: require.Error,
 		},
 		{
 			desc: "AgentPool creation fails, keep existing pools",
 			reverseTunnels: []services.ReverseTunnel{
-				services.NewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
-				services.NewReverseTunnel("cluster-b", []string{"addr-b"}),
-				services.NewReverseTunnel("cluster-c", []string{"addr-c1", "addr-c2"}),
+				mustNewReverseTunnel("cluster-a", []string{"addr-a", "addr-b", "addr-c"}),
+				mustNewReverseTunnel("cluster-b", []string{"addr-b"}),
+				mustNewReverseTunnel("cluster-c", []string{"addr-c1", "addr-c2"}),
 			},
 			newAgentPoolErr: errors.New("nah"),
 			wantPools: map[remoteClusterKey]*AgentPool{
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
-				remoteClusterKey{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
-				remoteClusterKey{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-a"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-a"}},
+				{cluster: "cluster-a", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-b"}},
+				{cluster: "cluster-a", addr: "addr-c"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-a", ProxyAddr: "addr-c"}},
+				{cluster: "cluster-b", addr: "addr-b"}: &AgentPool{cfg: AgentPoolConfig{Cluster: "cluster-b", ProxyAddr: "addr-b"}},
 			},
 			assertErr: require.Error,
 		},
@@ -150,4 +151,12 @@ type mockAuthClient struct {
 
 func (c mockAuthClient) GetReverseTunnels(...services.MarshalOption) ([]services.ReverseTunnel, error) {
 	return c.reverseTunnels, c.reverseTunnelsErr
+}
+
+func mustNewReverseTunnel(clusterName string, dialAddrs []string) types.ReverseTunnel {
+	t, err := types.NewReverseTunnel(clusterName, dialAddrs)
+	if err != nil {
+		panic(err)
+	}
+	return t
 }

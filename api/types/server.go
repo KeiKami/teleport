@@ -302,18 +302,20 @@ func LabelsAsString(static map[string]string, dynamic map[string]CommandLabelV2)
 	return strings.Join(labels, ",")
 }
 
+// setStaticFields sets static resource header and metadata fields.
+func (s *ServerV2) setStaticFields() {
+	s.Version = V2
+}
+
 // CheckAndSetDefaults checks and set default values for any missing fields.
 func (s *ServerV2) CheckAndSetDefaults() error {
 	// TODO(awly): default s.Metadata.Expiry if not set (use
 	// defaults.ServerAnnounceTTL).
-
-	err := s.Metadata.CheckAndSetDefaults()
-	if err != nil {
+	s.setStaticFields()
+	if err := s.Metadata.CheckAndSetDefaults(); err != nil {
 		return trace.Wrap(err)
 	}
-	if s.Version == "" {
-		s.Version = V2
-	}
+
 	if s.Kind == "" {
 		return trace.BadParameter("server Kind is empty")
 	}

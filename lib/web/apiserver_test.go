@@ -1599,9 +1599,13 @@ func (s *WebSuite) TestMultipleConnectors(c *C) {
 			},
 		},
 	}
-	err := s.server.Auth().UpsertOIDCConnector(ctx, services.NewOIDCConnector("foo", oidcConnectorSpec))
+	o, err := services.NewOIDCConnector("foo", oidcConnectorSpec)
 	c.Assert(err, IsNil)
-	err = s.server.Auth().UpsertOIDCConnector(ctx, services.NewOIDCConnector("bar", oidcConnectorSpec))
+	err = s.server.Auth().UpsertOIDCConnector(ctx, o)
+	c.Assert(err, IsNil)
+	o2, err := services.NewOIDCConnector("bar", oidcConnectorSpec)
+	c.Assert(err, IsNil)
+	err = s.server.Auth().UpsertOIDCConnector(ctx, o2)
 	c.Assert(err, IsNil)
 
 	// set the auth preferences to oidc with no connector name
@@ -1841,13 +1845,14 @@ func TestClusterDatabasesGet(t *testing.T) {
 	require.Len(t, dbs, 0)
 
 	// Register a database.
-	db := types.NewDatabaseServerV3("test-db-name", map[string]string{"test-field": "test-value"}, types.DatabaseServerSpecV3{
+	db, err := types.NewDatabaseServerV3("test-db-name", map[string]string{"test-field": "test-value"}, types.DatabaseServerSpecV3{
 		Description: "test-description",
 		Protocol:    "test-protocol",
 		URI:         "test-uri",
 		Hostname:    "test-hostname",
 		HostID:      "test-hostID",
 	})
+	require.NoError(t, err)
 
 	_, err = env.server.Auth().UpsertDatabaseServer(context.Background(), db)
 	require.NoError(t, err)

@@ -62,13 +62,18 @@ func (s *KeepAlive) GetType() string {
 	}
 }
 
-// CheckAndSetDefaults validates this KeepAlive value and sets default values
-func (s *KeepAlive) CheckAndSetDefaults() error {
-	if s.IsEmpty() {
-		return trace.BadParameter("invalid keep alive, missing lease ID and resource name")
-	}
+// setStaticFields sets static resource header and metadata fields.
+func (s *KeepAlive) setStaticFields() {
 	if s.Namespace == "" {
 		s.Namespace = defaults.Namespace
+	}
+}
+
+// CheckAndSetDefaults validates this KeepAlive value and sets default values
+func (s *KeepAlive) CheckAndSetDefaults() error {
+	s.setStaticFields()
+	if s.IsEmpty() {
+		return trace.BadParameter("invalid keep alive, missing lease ID and resource name")
 	}
 	return nil
 }
