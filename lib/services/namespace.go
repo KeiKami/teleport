@@ -24,6 +24,10 @@ import (
 
 // MarshalNamespace marshals the Namespace resource to JSON.
 func MarshalNamespace(resource Namespace, opts ...MarshalOption) ([]byte, error) {
+	if err := resource.CheckAndSetDefaults(); err != nil {
+		return nil, trace.Wrap(err)
+	}
+
 	cfg, err := CollectOptions(opts)
 	if err != nil {
 		return nil, trace.Wrap(err)

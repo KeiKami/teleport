@@ -129,5 +129,8 @@ func UnmarshalAuthPreference(bytes []byte, opts ...MarshalOption) (AuthPreferenc
 
 // MarshalAuthPreference marshals the AuthPreference resource to JSON.
 func MarshalAuthPreference(c AuthPreference, opts ...MarshalOption) ([]byte, error) {
+	if err := c.CheckAndSetDefaults(); err != nil {
+		return nil, trace.Wrap(err)
+	}
 	return json.Marshal(c)
 }

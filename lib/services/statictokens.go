@@ -70,6 +70,10 @@ func UnmarshalStaticTokens(bytes []byte, opts ...MarshalOption) (StaticTokens, e
 
 // MarshalStaticTokens marshals the StaticTokens resource to JSON.
 func MarshalStaticTokens(staticToken StaticTokens, opts ...MarshalOption) ([]byte, error) {
+	if err := staticToken.CheckAndSetDefaults(); err != nil {
+		return nil, trace.Wrap(err)
+	}
+
 	cfg, err := CollectOptions(opts)
 	if err != nil {
 		return nil, trace.Wrap(err)
@@ -77,9 +81,6 @@ func MarshalStaticTokens(staticToken StaticTokens, opts ...MarshalOption) ([]byt
 
 	switch staticToken := staticToken.(type) {
 	case *StaticTokensV2:
-		if version := staticToken.GetVersion(); version != V2 {
-			return nil, trace.BadParameter("mismatched static token version %v and type %T", version, staticToken)
-		}
 		if !cfg.PreserveResourceID {
 			// avoid modifying the original object
 			// to prevent unexpected data races

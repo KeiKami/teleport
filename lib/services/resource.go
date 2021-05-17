@@ -470,6 +470,10 @@ func init() {
 // NOTE: This function only supports the subset of resources which may be imported/exported
 // by users (e.g. via `tctl get`).
 func MarshalResource(resource Resource, opts ...MarshalOption) ([]byte, error) {
+	if err := resource.CheckAndSetDefaults(); err != nil {
+		return nil, trace.Wrap(err)
+	}
+
 	marshal, ok := getResourceMarshaler(resource.GetKind())
 	if !ok {
 		return nil, trace.NotImplemented("cannot dynamically marshal resources of kind %q", resource.GetKind())

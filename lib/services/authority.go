@@ -384,6 +384,10 @@ func UnmarshalCertAuthority(bytes []byte, opts ...MarshalOption) (CertAuthority,
 
 // MarshalCertAuthority marshals the CertAuthority resource to JSON.
 func MarshalCertAuthority(certAuthority CertAuthority, opts ...MarshalOption) ([]byte, error) {
+	if err := ValidateCertAuthority(certAuthority); err != nil {
+		return nil, trace.Wrap(err)
+	}
+
 	cfg, err := CollectOptions(opts)
 	if err != nil {
 		return nil, trace.Wrap(err)
@@ -391,9 +395,6 @@ func MarshalCertAuthority(certAuthority CertAuthority, opts ...MarshalOption) ([
 
 	switch certAuthority := certAuthority.(type) {
 	case *CertAuthorityV2:
-		if version := certAuthority.GetVersion(); version != V2 {
-			return nil, trace.BadParameter("mismatched certificate authority version %v and type %T", version, certAuthority)
-		}
 		if !cfg.PreserveResourceID {
 			// avoid modifying the original object
 			// to prevent unexpected data races
