@@ -218,13 +218,13 @@ tsh login --request-reason="..."
 A number of new parameters are now available that grant the plugin or administrator greater insight into approvals/denials:
 
 ```bash
-tctl request deny --reason='Please be more specific' --annotations=method=cli,unix-user=${USER} 28a3fb86-0230-439d-ad88-11cfcb213193
+sudo tctl request deny --reason='Please be more specific' --annotations=method=cli,unix-user=${USER} 28a3fb86-0230-439d-ad88-11cfcb213193
 ```
 
 Because automatically generated requests always include all roles that the user is allowed to request, approvers can now specify a smaller subset of the requested roles that should be applied, allowing for sub-selection in cases where full escalation is not a desirable default:
 
 ```bash
-tctl request approve --roles=role-1,role-3 --reason='Approved, but not role-2 right now' 28a3fb86-0230-439d-ad88-11cfcb213193
+sudo tctl request approve --roles=role-1,role-3 --reason='Approved, but not role-2 right now' 28a3fb86-0230-439d-ad88-11cfcb213193
 ```
 
 ### Other features of Access Requests
