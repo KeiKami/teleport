@@ -58,7 +58,8 @@
           "slug": "/server-access/guides/",
           "entries": [
             { "title": "Using Teleport with PAM", "slug": "/server-access/guides/ssh-pam/" },
-            { "title": "OpenSSH Guide", "slug": "/server-access/guides/openssh/" }
+            { "title": "OpenSSH Guide", "slug": "/server-access/guides/openssh/" },
+            { "title": "SSH", "slug": "/server-access/guides/ssh/" }
           ]
         }
       ]
