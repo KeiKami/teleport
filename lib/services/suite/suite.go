@@ -1069,7 +1069,7 @@ func (s *ServicesTestSuite) AuthPreference(c *check.C) {
 
 // SessionRecordingConfig tests session recording configuration.
 func (s *ServicesTestSuite) SessionRecordingConfig(c *check.C) {
-	recConfig, err := types.NewSessionRecordingConfig(types.SessionRecordingConfigSpecV2{
+	recConfig, err := types.NewSessionRecordingConfigFromConfigFile(types.SessionRecordingConfigSpecV2{
 		Mode: services.RecordAtProxy,
 	})
 	c.Assert(err, check.IsNil)
@@ -1148,7 +1148,7 @@ func (s *ServicesTestSuite) ClusterConfig(c *check.C, opts ...Option) {
 	c.Assert(err, check.IsNil)
 
 	// DELETE IN 8.0.0
-	recConfig, err := types.NewSessionRecordingConfig(types.SessionRecordingConfigSpecV2{
+	recConfig, err := types.NewSessionRecordingConfigFromConfigFile(types.SessionRecordingConfigSpecV2{
 		Mode: services.RecordAtProxy,
 	})
 	c.Assert(err, check.IsNil)
@@ -1837,7 +1837,7 @@ func (s *ServicesTestSuite) EventsClusterConfig(c *check.C) {
 				Kind: types.KindSessionRecordingConfig,
 			},
 			crud: func(ctx context.Context) services.Resource {
-				recConfig, err := types.NewSessionRecordingConfig(types.SessionRecordingConfigSpecV2{
+				recConfig, err := types.NewSessionRecordingConfigFromConfigFile(types.SessionRecordingConfigSpecV2{
 					Mode: types.RecordAtProxySync,
 				})
 				c.Assert(err, check.IsNil)
