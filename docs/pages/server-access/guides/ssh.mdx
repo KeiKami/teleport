@@ -3,11 +3,19 @@ title: Teleport Server Access SSH Guide
 description: Teleport Server Access SSH guide.
 ---
 
-Teleport Server Access can be used with third-party SSH tools like [OpenSSH](./openssh.mdx). Each Teleport Node can also be configured into a dedicated SSH mode (Node mode) and run as an enhanced SSH server.
+Teleport Server Access can be used with third-party SSH tools like [OpenSSH](./openssh-client.mdx). Each Teleport Node can also be configured into a dedicated SSH mode ("Node" mode) and run as an enhanced SSH server.
 
 `tsh` is a command line client with support for both SCP and SSH that's used to interact with Teleport Nodes. As such, Teleport admins can choose to use `tsh` alone for SSH-related server access and reduce the complexity of their stack.
 
 This Guide describes common scenarios one is likely to encounter when using Teleport as an SSH server, as an SSH client, or both.
+
+<Figure
+  align="center"
+  bordered
+  caption="Teleport SSH agent forwarding."
+>
+  ![Example cluster arrangement](../../../img/server-access/teleport-ssh.svg)
+</Figure>
 
 ## Choose your SSH solution
 
@@ -23,7 +31,7 @@ Teleport features can be used to "wrap" or enhance existing SSH tools while reta
 
 ### Clients
 
-Teleport is compatible with popular clients like [OpenSSH](./openssh.mdx) and also provides its own [built-in SSH client](../../cli-docs.mdx#tsh) (`tsh`).
+Teleport is compatible with popular clients like [OpenSSH](./openssh-client.mdx) and also provides its own [built-in SSH client](../../cli-docs.mdx#tsh) (`tsh`).
 
 By default, SSH clients can connect to a Teleport cluster through the following port (exposed through the public proxy):
 
@@ -37,26 +45,130 @@ Teleport allows for complex, multi-client, arrangments as well as unified soluti
 
 Teleport is agnostic concerning your choice of SSH server backends and can be used to supplement existing features or serve as an intermediary between them and public clients.
 
-A common strategy involves using Teleport Nodes in Proxy mode to get all the benefits of Audit Logging, Session Recording, and/or 2FA.
+A common strategy involves using Teleport Nodes in Proxy mode to get all the benefits of Audit Logging, Session Recording, and/or Two-Factor Authentication.
 
-Most backends likely expose port `22` for inbound public clients and `tsh` will connect through the specified `--port` value on command:
+Most backends expose port `22` for inbound public clients and `tsh` will connect through the specified `--port` value on command:
 
 ```bash
 # tsh ssh into a public proxy Node using a specific port
 tsh ssh --port=22 user@tele.example.com
 ```
 
+## Connect to a Teleport cluster using tsh ssh
+
+Teleport SSH is robust enough that you can do all the things you'd do with OpenSSH, without it.
+
+To `tsh` into a cluster at `tele.example.com` with user `tele-admin`:
+
+1. On your local machine, log in through `tsh`: 
+
+   ```bash
+   # Log in through tsh
+   tsh login --proxy=tele.example.com:443 --user=tele-admin
+   ```
+   
+   You'll be prompted to supply the password and One Time Passcode you set up previously for `tele-admin`.
+
+2. `tele-admin` will now see:
+
+   ```bash
+   > Profile URL:        https://proxy.go-teleport.com:443
+     Logged in as:       tele-admin
+     Cluster:            tele.example.com
+     Roles:              access, editor
+     Logins:             root, ubuntu, ec2-user
+     Kubernetes:         disabled
+     Valid until:        2021-05-27 02:15:27 -0500 CDT [valid for 12h0m0s]
+     Extensions:         permit-agent-forwarding, permit-port-forwarding, permit-pty
+   ```
+
+   `tele-admin` is now logged into the `tele.example.com` cluster through Teleport SSH.
+
+3. `tele-admin` can now execute the following to find the cluster's `nodenames`. `nodenames` are used for establishing SSH connections:
+
+   ```bash
+   # Display cluster resources
+   tsh ls
+   ```
+
+   The *Proxy* Node is located on the bottom line below:
+
+   ```bash                        
+   Node Name        Address        Labels                                 
+   ---------------- -------------- -------------------------------------- 
+   ip-172-31-35-170 ⟵ Tunnel                                              
+   ip-172-31-41-144 127.0.0.1:3022 env=example, hostname=ip-172-31-41-144 
+   ```
+
+4. `tele-admin` can SSH any available Node they have been granted access to by running the following command locally:
+
+   ```bash
+   # Use tsh to ssh into a Node
+   tsh ssh root@ip-xxx-xx-xx-xxx
+   ```
+
+   Now, `tele-admin` can:
+
+   - Connect to other Nodes in the cluster by using the appropriate IP address in the `tsh ssh` command.  
+   - Traverse the Linux file system.  
+   - Execute desired commands.  
+
+   All commands executed by `tele-admin` are recorded and can be replayed in the Teleport Web interface.
+   
+   The `tsh ssh` command allows one to do anything they would if they were to SSH into a server using a third-party tool. Compare the two equivalent commands:
+
+<Tabs>
+  <TabItem label="tsh">
+    ```bash
+    tsh ssh root@ip-172-31-41-144
+    ```
+  </TabItem>
+  <TabItem label="ssh">
+    ```bash
+    ssh -J tele.example.com root@ip-172-31-41-144
+    ```
+  </TabItem>
+</Tabs>
+
+## SSH Agent support
+
+If there is an [ssh agent](https://en.wikipedia.org/wiki/Ssh-agent) running,
+`tsh login` will store the user certificate in the agent. This can be verified
+via:
+
+```bash
+ssh-add -L
+```
+
+The SSH agent can be used to supply the certificate to other SSH clients once the certificate is stored. 
+For example, to OpenSSH `ssh`.
+
+If you wish to disable SSH agent integration, pass the flag `--no-use-local-ssh-agent` to `tsh`. 
+
+You can also set the `TELEPORT_USE_LOCAL_SSH_AGENT` environment variable to `false` in your shell profile to make this permanent.
+
+## Inspecting an SSH certificate
+
+To inspect the SSH certificates in `~/.tsh`, a user may execute the following command:
+
+```bash
+tsh status
+
+# > Profile URL:  https://proxy.example.com:3080
+#  Logged in as: johndoe
+#  Cluster:      proxy.example.com
+#  Roles:        admin*
+#  Logins:       root, admin, guest
+#  Kubernetes:   disabled
+#  Valid until:  2017-04-25 15:02:30 -0700 PDT [valid for 1h0m0s]
+#  Extensions:   permit-agent-forwarding, permit-port-forwarding, permit-pty
+```
+
+Read the [CLI Docs - tsh status](../../cli-docs.mdx#tsh-status) for reference documentation.
+
 ## SSH mode and adding an SSH Node to your cluster
 
 Teleport [Nodes](../../architecture/nodes.mdx) have three modes: *Auth*, *Proxy*, and *Node* (SSH) mode. A single Node can run in up to all three modes. Optionally, you can configure a Node to act as the dedicated *Auth* or SSH Node for a cluster.
-
-<Figure
-  align="center"
-  bordered
-  caption="Teleport SSH agent forwarding."
->
-  ![Example cluster arrangement](../../../img/server-access/teleport-ssh.svg)
-</Figure>
 
 ### Configuration
 
@@ -109,123 +221,3 @@ To link an SSH Node with an existing `tele.example.com` cluster:
    >
      ![Both Nodes in the Web UI](../../../img/server-access/teleport_ui.png)
    </Figure>
-
-## Connect to a cluster using tsh ssh
-
-Teleport SSH is robust enough that you can do all the things you'd do with OpenSSH, without it.
-
-To `tsh` into a cluster at `tele.example.com` with user `tele-admin`:
-
-1. On your local machine, log in through `tsh`: 
-
-   ```bash
-   # Log in through tsh
-   tsh login --proxy=tele.example.com:443 --user=tele-admin
-   ```
-   
-   You'll be prompted to supply the password and One Time Passcode we set up previously.
-
-2. `tele-admin` will now see:
-
-   ```bash
-   Profile URL:        https://tele.example.com:443
-     Logged in as:       tele-admin
-     Cluster:            tele.example.com
-     Roles:              access, editor
-     Logins:             root, ubuntu, ec2-user
-     Kubernetes:         disabled
-     Valid until:        2021-04-30 06:39:13 -0500 CDT [valid for 12h0m0s]
-     Extensions:         permit-agent-forwarding, permit-port-forwarding, permit-pty
-   ```
-
-   `tele-admin` is now logged into the `tele.example.com` cluster through Teleport SSH.
-
-3. `tele-admin` can now execute the following to find the cluster's `nodenames`. `nodenames` are used for establishing SSH connections:
-
-   ```bash
-   # Display cluster resources
-   tsh ls
-   ```
-
-   The *Bastion Host* Node is located on the bottom line below:
-
-   ```bash                        
-   Node Name        Address        Labels                                 
-   ---------------- -------------- -------------------------------------- 
-   ip-172-31-35-170 ⟵ Tunnel                                              
-   ip-172-31-41-144 127.0.0.1:3022 env=example, hostname=ip-172-31-41-144 
-   ```
-
-4. `tele-admin` can SSH any available Node they have been granted access to by running the following command locally:
-
-   ```bash
-   # Use tsh to ssh into a Node
-   tsh ssh root@ip-xxx-xx-xx-xxx
-   ```
-
-   Now, `tele-admin` can:
-
-   - Connect to other Nodes in the cluster by using the appropriate IP address in the `tsh ssh` command.  
-   - Traverse the Linux file system.  
-   - Execute desired commands.  
-
-   All commands executed by `tele-admin` are recorded and can be replayed in the Teleport Web interface.
-   
-   The `tsh ssh` command allows one to do anything they would if they were to SSH into a server using a third-party tool. Compare the two equivalent commands:
-
-<Tabs>
-  <TabItem label="tsh">
-    ```bash
-    tsh ssh root@ip-172-31-41-144
-    ```
-  </TabItem>
-  <TabItem label="ssh">
-    ```bash
-    ssh -J tele.example.com root@ip-172-31-41-144
-    ```
-  </TabItem>
-</Tabs>
-
-## Connecting to SSH clusters behind firewalls
-
-Teleport supports creating clusters of servers located behind firewalls
-**without any open listening TCP ports**.  This works by creating reverse SSH
-tunnels from behind-firewall environments into a Teleport proxy you have access to.
-
-These features are called [*Trusted Clusters*](https://gravitational.com/teleport/docs/trustedclusters/). Refer to
-[the admin manual](../../admin-guide.mdx#trusted-clusters) to learn how a trusted cluster can be configured.
-
-Assuming the `work` Teleport proxy server is configured with a few trusted
-clusters, a user may use the `tsh clusters` command to see a list of all clusters on the server:
-
-```bash
-tsh --proxy=work clusters
-
-# Cluster Name     Status
-# ------------     ------
-# staging          online
-# production       offline
-```
-
-[CLI Docs - tsh clusters](../../cli-docs.mdx#tsh-clusters)
-
-Now you can use the `--cluster` flag with any `tsh` command. For example, to list SSH nodes that are members of the `production` cluster, simply do:
-
-```bash
-tsh --proxy=work ls --cluster=production
-# Node Name     Node ID       Address            Labels
-# ---------     -------       -------            ------
-# db-1          xxxxxxxxx     10.0.20.31:3022    kernel:4.4
-# db-2          xxxxxxxxx     10.0.20.41:3022    kernel:4.2
-```
-
-Similarly, if you want to SSH into `db-1` inside the `production` cluster:
-
-```bash
-tsh --proxy=work ssh --cluster=production db-1
-```
-
-This is possible even if nodes in the `production` cluster are located behind a
-firewall without open ports. This works because the `production` cluster
-establishes a reverse SSH tunnel back into `work` proxy, and this tunnel is used
-to establish inbound SSH connections.
