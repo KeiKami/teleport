@@ -153,15 +153,18 @@ To inspect the SSH certificates in `~/.tsh`, a user may execute the following co
 
 ```bash
 tsh status
+```
 
-# > Profile URL:  https://proxy.example.com:3080
-#  Logged in as: johndoe
-#  Cluster:      proxy.example.com
-#  Roles:        admin*
-#  Logins:       root, admin, guest
-#  Kubernetes:   disabled
-#  Valid until:  2017-04-25 15:02:30 -0700 PDT [valid for 1h0m0s]
-#  Extensions:   permit-agent-forwarding, permit-port-forwarding, permit-pty
+```bash
+# Output
+> Profile URL:  https://proxy.example.com:3080
+  Logged in as: johndoe
+  Cluster:      proxy.example.com
+  Roles:        admin*
+  Logins:       root, admin, guest
+  Kubernetes:   disabled
+  Valid until:  2017-04-25 15:02:30 -0700 PDT [valid for 1h0m0s]
+  Extensions:   permit-agent-forwarding, permit-port-forwarding, permit-pty
 ```
 
 Read the [CLI Docs - tsh status](../../cli-docs.mdx#tsh-status) for reference documentation.
@@ -186,7 +189,7 @@ To link an SSH Node with an existing `tele.example.com` cluster:
 
    ```bash
    # Let's save the token to a file
-   sudo tctl tokens add --type=node | grep -oP '(?<=token:\s).*' > token.file
+   tctl tokens add --type=node | grep -oP '(?<=token:\s).*' > token.file
    ```
  
    Each Teleport Node can be configured into SSH mode (Teleport Node) and run as an enhanced SSH server. "Node" mode specifies that the Teleport Node will act and join as an SSH server.  
@@ -205,7 +208,7 @@ To link an SSH Node with an existing `tele.example.com` cluster:
    # Join cluster
    sudo teleport start \
      --roles=node \
-     --token=./token.file \
+     --token=/token.file \
      --auth-server=tele.example.com:443
    ```
 

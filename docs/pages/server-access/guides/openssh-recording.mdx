@@ -3,16 +3,13 @@ title: OpenSSH Recording Proxy Guide
 description: How to use Teleport Session Recording with OpenSSH and sshd.
 ---
 
-Teleport is fully compatible with OpenSSH and can be quickly set up to record and
-audit all SSH activity. Using Teleport and OpenSSH has the advantage of getting you up
-and running, but in the long run, we would recommend replacing `sshd` with `teleport`.
-We've outlined these reasons in [OpenSSH vs Teleport SSH for Servers?](https://gravitational.com/blog/openssh-vs-teleport/)
+Teleport is fully compatible with a range of SSH servers (including OpenSSH). Since Teleport is a standards-compliant SSH proxy, it can therefore augment your existing SSH tool with powerful features like enhancing recording and auditing for all SSH activity. 
 
-Teleport is a standards-compliant SSH proxy and it can work in environments with
-existing SSH implementations, such as OpenSSH. This section will cover:
+This Guide details how to:
 
-- Configuring OpenSSH server `sshd` to join a Teleport cluster. Existing fleets of
-  OpenSSH servers can be configured to accept SSH certificates dynamically issued by a Teleport CA.
+- Configure an OpenSSH server (`sshd`) to join a Teleport cluster. Existing fleets of OpenSSH servers can be configured to accept SSH certificates dynamically issued by a Teleport Certificate Authority (CA).
+
+To learn more about choosing your SSH client and server read [OpenSSH vs Teleport SSH for Servers?](https://gravitational.com/blog/openssh-vs-teleport/).
 
 ### Follow along with our video guide
 
@@ -67,6 +64,10 @@ Teleport OpenSSH supports:
 
 ## Set up OpenSSH recording proxy mode
 
+<Admonition type="warning" title="Warning">
+  Backing up production instances and/or configurations before making changes or modifications is a best practice. We encourage this so you can roll back to an existing state as needed.
+</Admonition>
+
 The first step is install and setup Teleport, we recommend starting with our [Getting Started Guide](../../getting-started.mdx) and [Admin Manual](../../admin-guide.mdx).
 
 To enable session recording for `sshd` nodes, the cluster must be switched to
@@ -88,7 +89,7 @@ Export the Teleport CA certificate into a file:
 
 ```bash
 # tctl needs to be run on the auth server.
-sudo tctl auth export --type=user > teleport_user_ca.pub
+tctl auth export --type=user > teleport_user_ca.pub
 ```
 
 To allow access for all users:
@@ -127,7 +128,7 @@ all OpenSSH nodes. To generate a host certificate, run this on your Teleport aut
 # Wildcard certs aren't supported by OpenSSH, must be full FQDN.
 # Management of the host certificates can become complex, this is another
 # reason we recommend using Teleport SSH on nodes.
-sudo tctl auth sign \
+tctl auth sign \
       --host=api.example.com,ssh.example.com,64.225.88.175,64.225.88.178 \
       --format=openssh \
       --out=api.example.com
@@ -135,23 +136,27 @@ sudo tctl auth sign \
 The credentials have been written to api.example.com, api.example.com-cert.pub
 
 # You can use ssh-keygen to verify the contents.
-sudo ssh-keygen -L -f api.example.com-cert.pub
-#api.example.com-cert.pub:
-#        Type: ssh-rsa-cert-v01@openssh.com host certificate
-#        Public key: RSA-CERT SHA256:ireEc5HWFjhYPUhmztaFud7EgsopO8l+GpxNMd3wMSk
-#        Signing CA: RSA SHA256:/6HSHsoU5u+r85M26Ut+M9gl+HventwSwrbTvP/cmvo
-#        Key ID: ""
-#        Serial: 0
-#        Valid: after 2020-07-29T20:26:24
-#        Principals:
-#               api.example.com
-#               ssh.example.com
-#               64.225.88.175
-#               64.225.88.178
-#        Critical Options: (none)
-#        Extensions:
-#                x-teleport-authority UNKNOWN OPTION (len 47)
-#                x-teleport-role UNKNOWN OPTION (len 8)
+ssh-keygen -L -f api.example.com-cert.pub
+```
+
+The certificate file `api.example.com-cert.pub`:
+
+```bash
+Type: ssh-rsa-cert-v01@openssh.com host certificate
+Public key: RSA-CERT SHA256:ireEc5HWFjhYPUhmztaFud7EgsopO8l+GpxNMd3wMSk
+Signing CA: RSA SHA256:/6HSHsoU5u+r85M26Ut+M9gl+HventwSwrbTvP/cmvo
+Key ID: ""
+Serial: 0
+Valid: after 2020-07-29T20:26:24
+Principals:
+      api.example.com
+      ssh.example.com
+      64.225.88.175
+      64.225.88.178
+Critical Options: (none)
+Extensions:
+      x-teleport-authority UNKNOWN OPTION (len 47)
+      x-teleport-role UNKNOWN OPTION (len 8)
 ```
 
 Then add the following lines to `/etc/ssh/sshd_config` on all OpenSSH nodes, and restart `sshd`.
@@ -180,7 +185,7 @@ terminate the SSH connection to record it:
 # Note that agent forwarding is enabled twice: one from a client to a proxy
 # (mandatory if using a recording proxy), and then optionally from a proxy
 # to the end server if you want your agent running on the end server or not
-sudo ssh -o "ForwardAgent yes" \
+ssh -o "ForwardAgent yes" \
     -o "ProxyCommand ssh -o 'ForwardAgent yes' -p 3023 %r@p.example.com -s proxy:%h:%p" \
     user@host.example.com
 ```
@@ -200,7 +205,7 @@ It's important to remember that SSH agent forwarding must be enabled on the clie
 # Login as Joe
 tsh login --proxy=proxy.example.com --user=joe
 # see if the certificate is present (look for "teleport:joe") at the end of the cert
-sudo ssh-add -L
+ssh-add -L
 ```
 
 <Admonition
@@ -234,4 +239,4 @@ To increase the concurrency level, increase the value to something like `MaxStar
 
 To revoke the current Teleport Certificate Authority and generate a new one, run `tctl auth rotate`. 
 
-Unless you've highly automated your infrastructure, we would suggest you proceed with caution as this will invalidate the user and host Certificate Authority's, meaning that the new Certificate Authority's will need to be exported to every OpenSSH-based machine again using `tctl auth export` as above.
+Unless you've highly automated your infrastructure, we would suggest you proceed with caution as this will invalidate the user and host Certificate Authority's, meaning that the new Certificate Authority will need to be exported to every OpenSSH-based machine again using `tctl auth export` as above.
