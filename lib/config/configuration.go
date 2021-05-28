@@ -818,6 +818,10 @@ func applySSHConfig(fc *FileConfig, cfg *service.Config) (err error) {
 		}
 	}
 
+	if fc.SSH.IdleTimeoutMessage != "" {
+		cfg.SSH.IdleTimeoutMessage = fc.SSH.IdleTimeoutMessage
+	}
+
 	return nil
 }
 
