@@ -142,7 +142,7 @@ Teleport proxy:
 ```bash
 eval `ssh-agent`
 # Agent pid 8403
-tsh login --proxy=root.example.com --user=teleport-admin
+tsh login --proxy=root.example.com --user=tele-admin
 ```
 
 `ssh-agent` will print environment variables into the console. Either `eval` the
@@ -242,7 +242,7 @@ This section describes how to connect to a Teleport Auth node in quickstart form
 3. Log in to the Teleport Auth server with `tsh`.
 
    ```bash
-   tsh login --proxy=root.example.com --user=teleport-admin
+   tsh login --proxy=root.example.com --user=tele-admin
    ```
 
 4. Modify your `ssh` configuration files to use a Teleport proxy on `proxy.example.com`. 
@@ -260,5 +260,5 @@ This section describes how to connect to a Teleport Auth node in quickstart form
 5. Use OpenSSH to connect:
 
    ```bash
-   ssh root@openssh-test2.centralus.cloudapp.azure.com -p 3022
+   ssh root@proxy.example.com -p 3022
    ```
