@@ -143,26 +143,27 @@ ssh-keygen -L -f api.example.com-cert.pub
 The certificate file `api.example.com-cert.pub`:
 
 ```bash
-Type: ssh-rsa-cert-v01@openssh.com host certificate
-Public key: RSA-CERT SHA256:ireEc5HWFjhYPUhmztaFud7EgsopO8l+GpxNMd3wMSk
-Signing CA: RSA SHA256:/6HSHsoU5u+r85M26Ut+M9gl+HventwSwrbTvP/cmvo
-Key ID: ""
-Serial: 0
-Valid: after 2020-07-29T20:26:24
-Principals:
-      api.example.com
-      ssh.example.com
-      64.225.88.175
-      64.225.88.178
-Critical Options: (none)
-Extensions:
-      x-teleport-authority UNKNOWN OPTION (len 47)
-      x-teleport-role UNKNOWN OPTION (len 8)
+api.example.com-cert.pub:
+      Type: ssh-rsa-cert-v01@openssh.com host certificate
+      Public key: RSA-CERT SHA256:nCoCc50c/EhP6z/hRxdMj1a0zeUaUNXIBVia4kmJvAY
+      Signing CA: RSA SHA256:vZ9pk6l4krR5DU8freGr1pKo7wvmCJOLjleBI2+nQ8k (using rsa-sha2-512)
+      Key ID: ""
+      Serial: 0
+      Valid: after 2021-05-29T02:49:34
+      Principals:
+            api.example.com
+            ssh.example.com
+            64.225.88.175
+            64.225.88.178
+      Critical Options: (none)
+      Extensions: 
+            x-teleport-authority UNKNOWN OPTION (len 27)
+            x-teleport-role UNKNOWN OPTION (len 8)
 ```
 
 Then add the following lines to `/etc/ssh/sshd_config` on all OpenSSH nodes, and restart `sshd`.
 
-```yaml
+```bash
 HostKey /etc/ssh/api.example.com
 HostCertificate /etc/ssh/api.example.com-cert.pub
 ```
