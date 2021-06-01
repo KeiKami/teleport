@@ -103,6 +103,29 @@ client:
 ssh jenkins.lab.example.com
 ```
 
+## OpenSSH hardening
+
+General ways to secure your SSH client and server connections are described below. 
+
+OpenSSH `sshd` server configuration settings are located in `/etc/ssh/sshd_config`.
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+The following settings are often modified:
+
+```yaml
+# Limit max retries
+MaxAuthTries 3
+
+# Disable password authentication
+PasswordAuthentication no
+
+# Disable root access for openssh
+PermitRootLogin no
+```
+
 ## Connect to a Teleport Proxy Node
 
 On your client machine, you need to import the public key of Teleport's host certificate. This will allow your OpenSSH client to verify that host certificates are signed by Teleport's trusted host Certificate Authority (CA). On your Teleport Auth server run:
