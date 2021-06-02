@@ -29,6 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	firestorebk "github.com/gravitational/teleport/lib/backend/firestore"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/events"
@@ -323,7 +324,7 @@ func (l *Log) EmitAuditEvent(ctx context.Context, in events.AuditEvent) error {
 		SessionID:      sessionID,
 		EventIndex:     in.GetIndex(),
 		EventType:      in.GetType(),
-		EventNamespace: defaults.Namespace,
+		EventNamespace: apidefaults.Namespace,
 		CreatedAt:      in.GetTime().Unix(),
 		Fields:         string(data),
 	}
@@ -362,7 +363,7 @@ func (l *Log) EmitAuditEventLegacy(ev events.Event, fields events.EventFields) e
 		SessionID:      sessionID,
 		EventIndex:     int64(eventIndex),
 		EventType:      fields.GetString(events.EventType),
-		EventNamespace: defaults.Namespace,
+		EventNamespace: apidefaults.Namespace,
 		CreatedAt:      created.Unix(),
 		Fields:         string(data),
 	}
@@ -394,7 +395,7 @@ func (l *Log) PostSessionSlice(slice events.SessionSlice) error {
 		}
 		event := event{
 			SessionID:      slice.SessionID,
-			EventNamespace: defaults.Namespace,
+			EventNamespace: apidefaults.Namespace,
 			EventType:      chunk.EventType,
 			EventIndex:     chunk.EventIndex,
 			CreatedAt:      time.Unix(0, chunk.Time).In(time.UTC).Unix(),
@@ -485,7 +486,7 @@ func (l *Log) SearchEvents(fromUTC, toUTC time.Time, namespace string, eventType
 
 	start := time.Now()
 	docSnaps, err := modifyquery(l.svc.Collection(l.CollectionName).
-		Where(eventNamespaceDocProperty, "==", defaults.Namespace).
+		Where(eventNamespaceDocProperty, "==", apidefaults.Namespace).
 		Where(createdAtDocProperty, ">=", fromUTC.Unix()).
 		Where(createdAtDocProperty, "<=", toUTC.Unix()).
 		OrderBy(createdAtDocProperty, firestore.Asc)).
@@ -547,7 +548,7 @@ func (l *Log) SearchSessionEvents(fromUTC time.Time, toUTC time.Time, limit int,
 		events.SessionStartEvent,
 		events.SessionEndEvent,
 	}
-	return l.SearchEvents(fromUTC, toUTC, defaults.Namespace, query, limit, startKey)
+	return l.SearchEvents(fromUTC, toUTC, apidefaults.Namespace, query, limit, startKey)
 }
 
 // WaitForDelivery waits for resources to be released and outstanding requests to

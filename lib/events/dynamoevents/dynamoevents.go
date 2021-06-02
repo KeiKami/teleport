@@ -27,9 +27,9 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/backend"
 	"github.com/gravitational/teleport/lib/backend/dynamo"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/events"
 	"github.com/gravitational/teleport/lib/session"
 	"github.com/gravitational/teleport/lib/utils"
@@ -457,7 +457,7 @@ func (l *Log) EmitAuditEvent(ctx context.Context, in events.AuditEvent) error {
 		SessionID:      sessionID,
 		EventIndex:     in.GetIndex(),
 		EventType:      in.GetType(),
-		EventNamespace: defaults.Namespace,
+		EventNamespace: apidefaults.Namespace,
 		CreatedAt:      in.GetTime().Unix(),
 		Fields:         string(data),
 		CreatedAtDate:  in.GetTime().Format(iso8601DateFormat),
@@ -504,7 +504,7 @@ func (l *Log) EmitAuditEventLegacy(ev events.Event, fields events.EventFields) e
 		SessionID:      sessionID,
 		EventIndex:     int64(eventIndex),
 		EventType:      fields.GetString(events.EventType),
-		EventNamespace: defaults.Namespace,
+		EventNamespace: apidefaults.Namespace,
 		CreatedAt:      created.Unix(),
 		Fields:         string(data),
 		CreatedAtDate:  created.Format(iso8601DateFormat),
@@ -554,7 +554,7 @@ func (l *Log) PostSessionSlice(slice events.SessionSlice) error {
 
 		event := event{
 			SessionID:      slice.SessionID,
-			EventNamespace: defaults.Namespace,
+			EventNamespace: apidefaults.Namespace,
 			EventType:      chunk.EventType,
 			EventIndex:     chunk.EventIndex,
 			CreatedAt:      timeAt.Unix(),
@@ -863,7 +863,7 @@ func (l *Log) SearchSessionEvents(fromUTC time.Time, toUTC time.Time, limit int,
 		events.SessionStartEvent,
 		events.SessionEndEvent,
 	}
-	return l.SearchEvents(fromUTC, toUTC, defaults.Namespace, query, limit, startKey)
+	return l.SearchEvents(fromUTC, toUTC, apidefaults.Namespace, query, limit, startKey)
 }
 
 // WaitForDelivery waits for resources to be released and outstanding requests to

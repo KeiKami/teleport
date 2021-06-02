@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gravitational/teleport/api/client/proto"
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/services"
 	"gopkg.in/check.v1"
 )
@@ -24,7 +24,7 @@ func (s *UserContextSuite) TestNewUserContext(c *check.C) {
 
 	// set some rules
 	role1 := &services.RoleV3{}
-	role1.SetNamespaces(services.Allow, []string{defaults.Namespace})
+	role1.SetNamespaces(services.Allow, []string{apidefaults.Namespace})
 	role1.SetRules(services.Allow, []services.Rule{
 		{
 			Resources: []string{services.KindAuthConnector},
@@ -41,7 +41,7 @@ func (s *UserContextSuite) TestNewUserContext(c *check.C) {
 	})
 
 	role2 := &services.RoleV3{}
-	role2.SetNamespaces(services.Allow, []string{defaults.Namespace})
+	role2.SetNamespaces(services.Allow, []string{apidefaults.Namespace})
 	role2.SetRules(services.Allow, []services.Rule{
 		{
 			Resources: []string{services.KindTrustedCluster},

@@ -32,6 +32,7 @@ import (
 
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/constants"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/auth/u2f"
 	"github.com/gravitational/teleport/lib/backend"
@@ -111,7 +112,7 @@ func NewTestCAWithConfig(config TestCAConfig) *services.CertAuthorityV2 {
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      config.ClusterName,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.CertAuthoritySpecV2{
 			Type:         config.Type,
@@ -174,7 +175,7 @@ func newUser(name string, roles []string) services.User {
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      name,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.UserSpecV2{
 			Roles: roles,
@@ -231,7 +232,7 @@ func (s *ServicesTestSuite) UsersExpiry(c *check.C) {
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      "foo",
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 			Expires:   &expiresAt,
 		},
 		Spec: services.UserSpecV2{},
@@ -344,11 +345,11 @@ func NewServer(kind, name, addr, namespace string) *services.ServerV2 {
 func (s *ServicesTestSuite) ServerCRUD(c *check.C) {
 	ctx := context.Background()
 	// SSH service.
-	out, err := s.PresenceS.GetNodes(ctx, defaults.Namespace)
+	out, err := s.PresenceS.GetNodes(ctx, apidefaults.Namespace)
 	c.Assert(err, check.IsNil)
 	c.Assert(len(out), check.Equals, 0)
 
-	srv := NewServer(services.KindNode, "srv1", "127.0.0.1:2022", defaults.Namespace)
+	srv := NewServer(services.KindNode, "srv1", "127.0.0.1:2022", apidefaults.Namespace)
 	_, err = s.PresenceS.UpsertNode(ctx, srv)
 	c.Assert(err, check.IsNil)
 
@@ -375,7 +376,7 @@ func (s *ServicesTestSuite) ServerCRUD(c *check.C) {
 	c.Assert(err, check.IsNil)
 	c.Assert(len(out), check.Equals, 0)
 
-	proxy := NewServer(services.KindProxy, "proxy1", "127.0.0.1:2023", defaults.Namespace)
+	proxy := NewServer(services.KindProxy, "proxy1", "127.0.0.1:2023", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertProxy(proxy), check.IsNil)
 
 	out, err = s.PresenceS.GetProxies()
@@ -396,7 +397,7 @@ func (s *ServicesTestSuite) ServerCRUD(c *check.C) {
 	c.Assert(err, check.IsNil)
 	c.Assert(len(out), check.Equals, 0)
 
-	auth := NewServer(services.KindAuthServer, "auth1", "127.0.0.1:2025", defaults.Namespace)
+	auth := NewServer(services.KindAuthServer, "auth1", "127.0.0.1:2025", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertAuthServer(auth), check.IsNil)
 
 	out, err = s.PresenceS.GetAuthServers()
@@ -410,9 +411,9 @@ func (s *ServicesTestSuite) ServerCRUD(c *check.C) {
 	c.Assert(err, check.IsNil)
 	c.Assert(len(out), check.Equals, 0)
 
-	kube1 := NewServer(services.KindKubeService, "kube1", "10.0.0.1:3026", defaults.Namespace)
+	kube1 := NewServer(services.KindKubeService, "kube1", "10.0.0.1:3026", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertKubeService(ctx, kube1), check.IsNil)
-	kube2 := NewServer(services.KindKubeService, "kube2", "10.0.0.2:3026", defaults.Namespace)
+	kube2 := NewServer(services.KindKubeService, "kube2", "10.0.0.2:3026", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertKubeService(ctx, kube2), check.IsNil)
 
 	out, err = s.PresenceS.GetKubeServices(ctx)
@@ -441,7 +442,7 @@ func NewAppServer(name string, internalAddr string, publicAddr string) *services
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      uuid.New(),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.ServerSpecV2{
 			Apps: []*services.App{
@@ -463,7 +464,7 @@ func (s *ServicesTestSuite) AppServerCRUD(c *check.C) {
 	server := NewAppServer("foo", "http://127.0.0.1:8080", "foo.example.com")
 
 	// Expect not to be returned any applications and trace.NotFound.
-	out, err := s.PresenceS.GetAppServers(ctx, defaults.Namespace)
+	out, err := s.PresenceS.GetAppServers(ctx, apidefaults.Namespace)
 	c.Assert(err, check.IsNil)
 	c.Assert(len(out), check.Equals, 0)
 
@@ -494,7 +495,7 @@ func newReverseTunnel(clusterName string, dialAddrs []string) *services.ReverseT
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      clusterName,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.ReverseTunnelSpecV2{
 			ClusterName: clusterName,
@@ -677,14 +678,14 @@ func (s *ServicesTestSuite) RolesCRUD(c *check.C) {
 		Version: services.V3,
 		Metadata: services.Metadata{
 			Name:      "role1",
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.RoleSpecV3{
 			Options: services.RoleOptions{
 				MaxSessionTTL:     services.Duration(time.Hour),
 				PortForwarding:    services.NewBoolOption(true),
 				CertificateFormat: teleport.CertificateFormatStandard,
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: services.RoleConditions{
 				Logins:           []string{"root", "bob"},
@@ -692,13 +693,13 @@ func (s *ServicesTestSuite) RolesCRUD(c *check.C) {
 				AppLabels:        services.Labels{services.Wildcard: []string{services.Wildcard}},
 				KubernetesLabels: services.Labels{services.Wildcard: []string{services.Wildcard}},
 				DatabaseLabels:   services.Labels{services.Wildcard: []string{services.Wildcard}},
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				Rules: []services.Rule{
 					services.NewRule(services.KindRole, services.RO()),
 				},
 			},
 			Deny: services.RoleConditions{
-				Namespaces: []string{defaults.Namespace},
+				Namespaces: []string{apidefaults.Namespace},
 			},
 		},
 	}
@@ -734,8 +735,8 @@ func (s *ServicesTestSuite) NamespacesCRUD(c *check.C) {
 		Kind:    services.KindNamespace,
 		Version: services.V2,
 		Metadata: services.Metadata{
-			Name:      defaults.Namespace,
-			Namespace: defaults.Namespace,
+			Name:      apidefaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 	}
 	err = s.PresenceS.UpsertNamespace(ns)
@@ -829,7 +830,7 @@ func (s *ServicesTestSuite) SAMLCRUD(c *check.C) {
 		Version: services.V2,
 		Metadata: services.Metadata{
 			Name:      "saml1",
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.SAMLConnectorSpecV2{
 			Issuer:                   "http://example.com",
@@ -954,7 +955,7 @@ func (s *ServicesTestSuite) GithubConnectorCRUD(c *check.C) {
 		Version: services.V3,
 		Metadata: services.Metadata{
 			Name:      "github",
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: services.GithubConnectorSpecV3{
 			ClientID:     "aaa",
@@ -1514,7 +1515,7 @@ func (s *ServicesTestSuite) Events(c *check.C) {
 					Version: services.V2,
 					Metadata: services.Metadata{
 						Name:      "testnamespace",
-						Namespace: defaults.Namespace,
+						Namespace: apidefaults.Namespace,
 					},
 				}
 				err := s.PresenceS.UpsertNamespace(ns)
@@ -1611,7 +1612,7 @@ func (s *ServicesTestSuite) Events(c *check.C) {
 				Kind: services.KindNode,
 			},
 			crud: func() services.Resource {
-				srv := NewServer(services.KindNode, "srv1", "127.0.0.1:2022", defaults.Namespace)
+				srv := NewServer(services.KindNode, "srv1", "127.0.0.1:2022", apidefaults.Namespace)
 
 				_, err := s.PresenceS.UpsertNode(ctx, srv)
 				c.Assert(err, check.IsNil)
@@ -1631,7 +1632,7 @@ func (s *ServicesTestSuite) Events(c *check.C) {
 				Kind: services.KindProxy,
 			},
 			crud: func() services.Resource {
-				srv := NewServer(services.KindProxy, "srv1", "127.0.0.1:2022", defaults.Namespace)
+				srv := NewServer(services.KindProxy, "srv1", "127.0.0.1:2022", apidefaults.Namespace)
 
 				err := s.PresenceS.UpsertProxy(srv)
 				c.Assert(err, check.IsNil)
@@ -1725,7 +1726,7 @@ func (s *ServicesTestSuite) Events(c *check.C) {
 					Version: services.V2,
 					Metadata: services.Metadata{
 						Name:      "shmest",
-						Namespace: defaults.Namespace,
+						Namespace: apidefaults.Namespace,
 					},
 				}
 				err := s.PresenceS.UpsertNamespace(ns)
@@ -1808,7 +1809,7 @@ func (s *ServicesTestSuite) ProxyWatcher(c *check.C) {
 		c.Fatalf("Timeout waiting for ProxyWatcher reset")
 	}
 
-	proxy := NewServer(services.KindProxy, "proxy1", "127.0.0.1:2023", defaults.Namespace)
+	proxy := NewServer(services.KindProxy, "proxy1", "127.0.0.1:2023", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertProxy(proxy), check.IsNil)
 
 	// the first event is always the current list of proxies
@@ -1825,7 +1826,7 @@ func (s *ServicesTestSuite) ProxyWatcher(c *check.C) {
 	}
 
 	// add a second proxy
-	proxy2 := NewServer(services.KindProxy, "proxy2", "127.0.0.1:2023", defaults.Namespace)
+	proxy2 := NewServer(services.KindProxy, "proxy2", "127.0.0.1:2023", apidefaults.Namespace)
 	c.Assert(s.PresenceS.UpsertProxy(proxy2), check.IsNil)
 
 	// watcher should detect the proxy list change

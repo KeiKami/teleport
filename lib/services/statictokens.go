@@ -19,7 +19,7 @@ package services
 import (
 	"github.com/gravitational/trace"
 
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/utils"
 )
 
@@ -31,7 +31,7 @@ func DefaultStaticTokens() StaticTokens {
 		Version: V2,
 		Metadata: Metadata{
 			Name:      MetaNameStaticTokens,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: StaticTokensSpecV2{
 			StaticTokens: []ProvisionTokenV1{},

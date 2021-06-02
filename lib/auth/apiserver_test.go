@@ -25,8 +25,8 @@ import (
 	"testing"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/services"
 
 	"github.com/google/go-cmp/cmp"
@@ -51,13 +51,13 @@ func TestUpsertServer(t *testing.T) {
 		{
 			desc: "node",
 			reqServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindNode,
 			},
 			role: teleport.RoleNode,
 			wantServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindNode,
 			},
@@ -66,13 +66,13 @@ func TestUpsertServer(t *testing.T) {
 		{
 			desc: "proxy",
 			reqServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindProxy,
 			},
 			role: teleport.RoleProxy,
 			wantServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindProxy,
 			},
@@ -81,13 +81,13 @@ func TestUpsertServer(t *testing.T) {
 		{
 			desc: "auth",
 			reqServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindAuthServer,
 			},
 			role: teleport.RoleAuth,
 			wantServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindAuthServer,
 			},
@@ -96,7 +96,7 @@ func TestUpsertServer(t *testing.T) {
 		{
 			desc: "unknown",
 			reqServer: &services.ServerV2{
-				Metadata: services.Metadata{Name: "test-server", Namespace: defaults.Namespace},
+				Metadata: services.Metadata{Name: "test-server", Namespace: apidefaults.Namespace},
 				Version:  services.V2,
 				Kind:     services.KindNode,
 			},
@@ -119,7 +119,7 @@ func TestUpsertServer(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "http://localhost", bytes.NewReader(body))
 			req.RemoteAddr = remoteAddr
 
-			_, err = new(APIServer).upsertServer(s, tt.role, req, httprouter.Params{httprouter.Param{Key: "namespace", Value: defaults.Namespace}})
+			_, err = new(APIServer).upsertServer(s, tt.role, req, httprouter.Params{httprouter.Param{Key: "namespace", Value: apidefaults.Namespace}})
 			tt.assertErr(t, err)
 			if err != nil {
 				return
@@ -132,7 +132,7 @@ func TestUpsertServer(t *testing.T) {
 				allServers = append(allServers, servers...)
 			}
 			addServers(s.GetAuthServers())
-			addServers(s.GetNodes(ctx, defaults.Namespace))
+			addServers(s.GetNodes(ctx, apidefaults.Namespace))
 			addServers(s.GetProxies())
 			require.Empty(t, cmp.Diff(allServers, []services.Server{tt.wantServer}, cmpopts.IgnoreFields(types.Metadata{}, "ID")))
 		})

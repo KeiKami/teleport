@@ -49,6 +49,7 @@ import (
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/client/proto"
 	"github.com/gravitational/teleport/api/client/webclient"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/auth/native"
@@ -1351,7 +1352,7 @@ func (process *TeleportProcess) initAuthService() error {
 				Kind:    services.KindAuthServer,
 				Version: services.V2,
 				Metadata: services.Metadata{
-					Namespace: defaults.Namespace,
+					Namespace: apidefaults.Namespace,
 					Name:      process.Config.HostUUID,
 				},
 				Spec: services.ServerSpecV2{
@@ -1369,13 +1370,13 @@ func (process *TeleportProcess) initAuthService() error {
 			} else {
 				srv.Spec.Rotation = state.Spec.Rotation
 			}
-			srv.SetExpiry(process.Clock.Now().UTC().Add(defaults.ServerAnnounceTTL))
+			srv.SetExpiry(process.Clock.Now().UTC().Add(apidefaults.ServerAnnounceTTL))
 			return &srv, nil
 		},
-		KeepAlivePeriod: defaults.ServerKeepAliveTTL,
-		AnnouncePeriod:  defaults.ServerAnnounceTTL/2 + utils.RandomDuration(defaults.ServerAnnounceTTL/10),
+		KeepAlivePeriod: apidefaults.ServerKeepAliveTTL,
+		AnnouncePeriod:  apidefaults.ServerAnnounceTTL/2 + utils.RandomDuration(apidefaults.ServerAnnounceTTL/10),
 		CheckPeriod:     defaults.HeartbeatCheckPeriod,
-		ServerTTL:       defaults.ServerAnnounceTTL,
+		ServerTTL:       apidefaults.ServerAnnounceTTL,
 		OnHeartbeat: func(err error) {
 			if err != nil {
 				process.BroadcastEvent(Event{Name: TeleportDegradedEvent, Payload: teleport.ComponentAuth})
@@ -1913,11 +1914,11 @@ func (process *TeleportProcess) initUploaderService(accessPoint auth.AccessPoint
 		return trace.Wrap(err)
 	}
 	// prepare dirs for uploader
-	streamingDir := []string{process.Config.DataDir, teleport.LogsDir, teleport.ComponentUpload, events.StreamingLogsDir, defaults.Namespace}
+	streamingDir := []string{process.Config.DataDir, teleport.LogsDir, teleport.ComponentUpload, events.StreamingLogsDir, apidefaults.Namespace}
 	paths := [][]string{
 		// DELETE IN (5.1.0)
 		// this directory will no longer be used after migration to 5.1.0
-		{process.Config.DataDir, teleport.LogsDir, teleport.ComponentUpload, events.SessionLogsDir, defaults.Namespace},
+		{process.Config.DataDir, teleport.LogsDir, teleport.ComponentUpload, events.SessionLogsDir, apidefaults.Namespace},
 		// This directory will remain to be used after migration to 5.1.0
 		streamingDir,
 	}
@@ -1947,7 +1948,7 @@ func (process *TeleportProcess) initUploaderService(accessPoint auth.AccessPoint
 	// see below
 	uploader, err := events.NewUploader(events.UploaderConfig{
 		DataDir:   filepath.Join(process.Config.DataDir, teleport.LogsDir),
-		Namespace: defaults.Namespace,
+		Namespace: apidefaults.Namespace,
 		ServerID:  teleport.ComponentUpload,
 		AuditLog:  auditLog,
 		EventsC:   process.Config.UploadEventsC,
@@ -2078,7 +2079,7 @@ func (process *TeleportProcess) initDiagnosticService() error {
 
 	server := &http.Server{
 		Handler:           mux,
-		ReadHeaderTimeout: defaults.DefaultDialTimeout,
+		ReadHeaderTimeout: apidefaults.DefaultDialTimeout,
 		ErrorLog:          utils.NewStdlogger(log.Error, teleport.ComponentDiagnostic),
 	}
 
@@ -2651,7 +2652,7 @@ func (process *TeleportProcess) initProxyEndpoint(conn *Connector) error {
 		}
 		webServer = &http.Server{
 			Handler:           proxyLimiter,
-			ReadHeaderTimeout: defaults.DefaultDialTimeout,
+			ReadHeaderTimeout: apidefaults.DefaultDialTimeout,
 			ErrorLog:          utils.NewStdlogger(log.Error, teleport.ComponentProxy),
 		}
 		process.RegisterCriticalFunc("proxy.web", func() error {
@@ -2683,7 +2684,7 @@ func (process *TeleportProcess) initProxyEndpoint(conn *Connector) error {
 		regular.SetCiphers(cfg.Ciphers),
 		regular.SetKEXAlgorithms(cfg.KEXAlgorithms),
 		regular.SetMACAlgorithms(cfg.MACAlgorithms),
-		regular.SetNamespace(defaults.Namespace),
+		regular.SetNamespace(apidefaults.Namespace),
 		regular.SetRotationGetter(process.getRotation),
 		regular.SetFIPS(cfg.FIPS),
 		regular.SetOnHeartbeat(func(err error) {
@@ -2756,7 +2757,7 @@ func (process *TeleportProcess) initProxyEndpoint(conn *Connector) error {
 		}
 		kubeServer, err = kubeproxy.NewTLSServer(kubeproxy.TLSServerConfig{
 			ForwarderConfig: kubeproxy.ForwarderConfig{
-				Namespace:         defaults.Namespace,
+				Namespace:         apidefaults.Namespace,
 				Keygen:            cfg.Keygen,
 				ClusterName:       clusterName,
 				ReverseTunnelSrv:  tsrv,
@@ -3065,7 +3066,7 @@ func (process *TeleportProcess) initApps() {
 			Kind:    services.KindAppServer,
 			Version: services.V2,
 			Metadata: services.Metadata{
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 				Name:      process.Config.HostUUID,
 			},
 			Spec: services.ServerSpecV2{

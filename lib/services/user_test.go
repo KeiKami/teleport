@@ -20,12 +20,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
+
 	"github.com/coreos/go-oidc/jose"
 	saml2 "github.com/russellhaering/gosaml2"
 	"github.com/russellhaering/gosaml2/types"
 	"gopkg.in/check.v1"
-
-	"github.com/gravitational/teleport/lib/defaults"
 )
 
 type UserSuite struct {
@@ -53,7 +53,7 @@ func (s *UserSuite) TestTraits(c *check.C) {
 			Version: V2,
 			Metadata: Metadata{
 				Name:      "foo",
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 			},
 			Spec: UserSpecV2{
 				Traits: map[string][]string{

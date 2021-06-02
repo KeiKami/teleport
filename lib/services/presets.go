@@ -18,7 +18,7 @@ package services
 
 import (
 	"github.com/gravitational/teleport"
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 
 	"github.com/pborman/uuid"
 )
@@ -31,19 +31,19 @@ func NewPresetEditorRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:        teleport.PresetEditorRoleName,
-			Namespace:   defaults.Namespace,
+			Namespace:   apidefaults.Namespace,
 			Description: "Edit cluster configuration",
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces: []string{defaults.Namespace},
+				Namespaces: []string{apidefaults.Namespace},
 				Rules: []Rule{
 					NewRule(KindUser, RW()),
 					NewRule(KindRole, RW()),
@@ -70,19 +70,19 @@ func NewPresetAccessRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:        teleport.PresetAccessRoleName,
-			Namespace:   defaults.Namespace,
+			Namespace:   apidefaults.Namespace,
 			Description: "Access cluster resources",
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},
@@ -110,16 +110,16 @@ func NewPresetAuditorRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:        teleport.PresetAuditorRoleName,
-			Namespace:   defaults.Namespace,
+			Namespace:   apidefaults.Namespace,
 			Description: "Review cluster events and replay sessions",
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 			},
 			Allow: RoleConditions{
-				Namespaces: []string{defaults.Namespace},
+				Namespaces: []string{apidefaults.Namespace},
 				Rules: []Rule{
 					NewRule(KindSession, RO()),
 					NewRule(KindEvent, RO()),

@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"strings"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	apiutils "github.com/gravitational/teleport/api/utils"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/reversetunnel"
 	"github.com/gravitational/teleport/lib/services"
 
@@ -49,7 +49,7 @@ type Getter interface {
 // In the future this function should be updated to keep state on application
 // servers that are down and to not route requests to that server.
 func Match(ctx context.Context, authClient Getter, fn Matcher) (*services.App, services.Server, error) {
-	servers, err := authClient.GetAppServers(ctx, defaults.Namespace)
+	servers, err := authClient.GetAppServers(ctx, apidefaults.Namespace)
 	if err != nil {
 		return nil, nil, trace.Wrap(err)
 	}

@@ -24,6 +24,7 @@ import (
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/require"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/services"
@@ -46,7 +47,7 @@ func TestHeartbeatKeepAlive(t *testing.T) {
 					Kind:    services.KindNode,
 					Version: services.V2,
 					Metadata: services.Metadata{
-						Namespace: defaults.Namespace,
+						Namespace: apidefaults.Namespace,
 						Name:      "1",
 					},
 					Spec: services.ServerSpecV2{
@@ -64,7 +65,7 @@ func TestHeartbeatKeepAlive(t *testing.T) {
 					Kind:    services.KindAppServer,
 					Version: services.V2,
 					Metadata: services.Metadata{
-						Namespace: defaults.Namespace,
+						Namespace: apidefaults.Namespace,
 						Name:      "1",
 					},
 					Spec: services.ServerSpecV2{
@@ -82,7 +83,7 @@ func TestHeartbeatKeepAlive(t *testing.T) {
 					Kind:    types.KindDatabaseServer,
 					Version: types.V3,
 					Metadata: types.Metadata{
-						Namespace: defaults.Namespace,
+						Namespace: apidefaults.Namespace,
 						Name:      "1",
 					},
 					Spec: types.DatabaseServerSpecV3{
@@ -114,7 +115,7 @@ func TestHeartbeatKeepAlive(t *testing.T) {
 				ServerTTL:       600 * time.Second,
 				Clock:           clock,
 				GetServerInfo: func() (services.Resource, error) {
-					server.SetExpiry(clock.Now().UTC().Add(defaults.ServerAnnounceTTL))
+					server.SetExpiry(clock.Now().UTC().Add(apidefaults.ServerAnnounceTTL))
 					return server, nil
 				},
 			})
@@ -223,7 +224,7 @@ func TestHeartbeatAnnounce(t *testing.T) {
 						Kind:    tt.kind,
 						Version: services.V2,
 						Metadata: services.Metadata{
-							Namespace: defaults.Namespace,
+							Namespace: apidefaults.Namespace,
 							Name:      "1",
 						},
 						Spec: services.ServerSpecV2{
@@ -231,7 +232,7 @@ func TestHeartbeatAnnounce(t *testing.T) {
 							Hostname: "2",
 						},
 					}
-					srv.SetExpiry(clock.Now().UTC().Add(defaults.ServerAnnounceTTL))
+					srv.SetExpiry(clock.Now().UTC().Add(apidefaults.ServerAnnounceTTL))
 					return srv, nil
 				},
 			})

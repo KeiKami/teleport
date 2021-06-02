@@ -27,10 +27,10 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	apisshutils "github.com/gravitational/teleport/api/utils/sshutils"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/bpf"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/events"
 	"github.com/gravitational/teleport/lib/pam"
 	"github.com/gravitational/teleport/lib/services"
@@ -339,7 +339,7 @@ func (s *Server) HostUUID() string {
 
 // GetNamespace returns the namespace the forwarding server resides in.
 func (s *Server) GetNamespace() string {
-	return defaults.Namespace
+	return apidefaults.Namespace
 }
 
 // AdvertiseAddr is the address of the remote host this forwarding server is
@@ -554,7 +554,7 @@ func (s *Server) newRemoteClient(systemLogin string) (*ssh.Client, error) {
 			authMethod,
 		},
 		HostKeyCallback: s.authHandlers.HostKeyAuth,
-		Timeout:         defaults.DefaultDialTimeout,
+		Timeout:         apidefaults.DefaultDialTimeout,
 	}
 
 	// Ciphers, KEX, and MACs preferences are honored by both the in-memory

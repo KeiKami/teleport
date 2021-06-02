@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/auth/testauthority"
@@ -512,7 +513,7 @@ func (p *databasePack) waitForLeaf(t *testing.T) {
 	for {
 		select {
 		case <-time.Tick(500 * time.Millisecond):
-			_, err := accessPoint.GetDatabaseServers(context.Background(), defaults.Namespace)
+			_, err := accessPoint.GetDatabaseServers(context.Background(), apidefaults.Namespace)
 			if err == nil {
 				return
 			}

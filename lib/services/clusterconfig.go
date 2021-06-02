@@ -19,7 +19,7 @@ package services
 import (
 	"github.com/gravitational/trace"
 
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/utils"
 )
 
@@ -31,7 +31,7 @@ func DefaultClusterConfig() ClusterConfig {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      MetaNameClusterConfig,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: ClusterConfigSpecV3{
 			LocalAuth: NewBool(true),

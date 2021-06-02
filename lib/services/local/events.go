@@ -21,6 +21,7 @@ import (
 	"context"
 	"sort"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/backend"
 	"github.com/gravitational/teleport/lib/defaults"
@@ -273,7 +274,7 @@ func (p *certAuthorityParser) parse(event backend.Event) (services.Resource, err
 			Version: services.V2,
 			Metadata: services.Metadata{
 				Name:      name,
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 			},
 		}, nil
 	case backend.OpPut:
@@ -677,7 +678,7 @@ func (p *userParser) parse(event backend.Event) (services.Resource, error) {
 
 func newNodeParser() *nodeParser {
 	return &nodeParser{
-		baseParser: baseParser{matchPrefix: backend.Key(nodesPrefix, defaults.Namespace)},
+		baseParser: baseParser{matchPrefix: backend.Key(nodesPrefix, apidefaults.Namespace)},
 	}
 }
 
@@ -740,7 +741,7 @@ func (p *tunnelConnectionParser) parse(event backend.Event) (services.Resource, 
 			Version: services.V2,
 			Metadata: services.Metadata{
 				Name:      name,
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 			},
 		}, nil
 	case backend.OpPut:
@@ -787,7 +788,7 @@ func (p *reverseTunnelParser) parse(event backend.Event) (services.Resource, err
 
 func newAppServerParser() *appServerParser {
 	return &appServerParser{
-		baseParser: baseParser{matchPrefix: backend.Key(appsPrefix, serversPrefix, defaults.Namespace)},
+		baseParser: baseParser{matchPrefix: backend.Key(appsPrefix, serversPrefix, apidefaults.Namespace)},
 	}
 }
 
@@ -888,7 +889,7 @@ func (p *kubeServiceParser) parse(event backend.Event) (services.Resource, error
 
 func newDatabaseServerParser() *databaseServerParser {
 	return &databaseServerParser{
-		baseParser: baseParser{matchPrefix: backend.Key(dbServersPrefix, defaults.Namespace)},
+		baseParser: baseParser{matchPrefix: backend.Key(dbServersPrefix, apidefaults.Namespace)},
 	}
 }
 
@@ -908,7 +909,7 @@ func (p *databaseServerParser) parse(event backend.Event) (services.Resource, er
 			Version: types.V3,
 			Metadata: services.Metadata{
 				Name:        name,
-				Namespace:   defaults.Namespace,
+				Namespace:   apidefaults.Namespace,
 				Description: hostID, // Pass host ID via description field for the cache.
 			},
 		}, nil
@@ -988,7 +989,7 @@ func resourceHeader(event backend.Event, kind, version string, offset int) (serv
 		Version: version,
 		Metadata: services.Metadata{
 			Name:      string(name),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 	}, nil
 }
@@ -1004,7 +1005,7 @@ func resourceHeaderWithTemplate(event backend.Event, hdr services.ResourceHeader
 		Version: hdr.Version,
 		Metadata: services.Metadata{
 			Name:      string(name),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 	}, nil
 }

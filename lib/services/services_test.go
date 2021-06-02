@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/fixtures"
 	"github.com/gravitational/teleport/lib/utils"
 
@@ -114,7 +114,7 @@ func TestServerDeepCopy(t *testing.T) {
 		Version: V2,
 		Metadata: Metadata{
 			Name:      "a",
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 			Labels:    map[string]string{"label": "value"},
 			Expires:   &expires,
 		},

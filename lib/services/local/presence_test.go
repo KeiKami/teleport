@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/check.v1"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/backend"
 	"github.com/gravitational/teleport/lib/backend/lite"
@@ -128,7 +129,7 @@ func TestDatabaseServersCRUD(t *testing.T) {
 		})
 
 	// Initially expect not to be returned any servers.
-	out, err := presence.GetDatabaseServers(ctx, defaults.Namespace)
+	out, err := presence.GetDatabaseServers(ctx, apidefaults.Namespace)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(out))
 
@@ -159,7 +160,7 @@ func TestDatabaseServersCRUD(t *testing.T) {
 	require.NoError(t, err)
 
 	// Now expect no servers to be returned.
-	out, err = presence.GetDatabaseServers(ctx, defaults.Namespace)
+	out, err = presence.GetDatabaseServers(ctx, apidefaults.Namespace)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(out))
 
@@ -186,7 +187,7 @@ func TestDatabaseServersCRUD(t *testing.T) {
 	require.NoError(t, err)
 
 	// Now expect no servers to be returned.
-	out, err = presence.GetDatabaseServers(ctx, defaults.Namespace)
+	out, err = presence.GetDatabaseServers(ctx, apidefaults.Namespace)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(out))
 }

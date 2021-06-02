@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/bpf"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/pam"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/srv/regular"
@@ -211,7 +211,7 @@ func newSrvCtx(t *testing.T) *SrvCtx {
 		"",
 		utils.NetAddr{},
 		regular.SetUUID(s.nodeID),
-		regular.SetNamespace(defaults.Namespace),
+		regular.SetNamespace(apidefaults.Namespace),
 		regular.SetEmitter(s.nodeClient),
 		regular.SetShell("/bin/sh"),
 		regular.SetSessionServer(s.nodeClient),

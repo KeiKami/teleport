@@ -27,10 +27,10 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/api/types/wrappers"
 	apiutils "github.com/gravitational/teleport/api/utils"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/modules"
 	"github.com/gravitational/teleport/lib/tlsca"
 	"github.com/gravitational/teleport/lib/utils"
@@ -115,18 +115,18 @@ func NewAdminRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      teleport.AdminRoleName,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},
@@ -151,7 +151,7 @@ func NewImplicitRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      teleport.DefaultImplicitRole,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
@@ -162,7 +162,7 @@ func NewImplicitRole() Role {
 				PortForwarding: NewBoolOption(false),
 			},
 			Allow: RoleConditions{
-				Namespaces: []string{defaults.Namespace},
+				Namespaces: []string{apidefaults.Namespace},
 				Rules:      CopyRulesSlice(DefaultImplicitRules),
 			},
 		},
@@ -176,18 +176,18 @@ func RoleForUser(u User) Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      RoleNameForUser(u.GetName()),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},
@@ -213,19 +213,19 @@ func NewDowngradedOSSAdminRole() Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      teleport.AdminRoleName,
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 			Labels:    map[string]string{teleport.OSSMigratedV6: types.True},
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},
@@ -252,18 +252,18 @@ func NewOSSGithubRole(logins []string, kubeUsers []string, kubeGroups []string) 
 		Version: V3,
 		Metadata: Metadata{
 			Name:      "github-" + uuid.New(),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
 				CertificateFormat: teleport.CertificateFormatStandard,
-				MaxSessionTTL:     NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL:     NewDuration(apidefaults.MaxCertDuration),
 				PortForwarding:    NewBoolOption(true),
 				ForwardAgent:      NewBool(true),
-				BPF:               defaults.EnhancedEvents(),
+				BPF:               apidefaults.EnhancedEvents(),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},
@@ -289,14 +289,14 @@ func RoleForCertAuthority(ca CertAuthority) Role {
 		Version: V3,
 		Metadata: Metadata{
 			Name:      RoleNameForCertAuthority(ca.GetClusterName()),
-			Namespace: defaults.Namespace,
+			Namespace: apidefaults.Namespace,
 		},
 		Spec: RoleSpecV3{
 			Options: RoleOptions{
-				MaxSessionTTL: NewDuration(defaults.MaxCertDuration),
+				MaxSessionTTL: NewDuration(apidefaults.MaxCertDuration),
 			},
 			Allow: RoleConditions{
-				Namespaces:       []string{defaults.Namespace},
+				Namespaces:       []string{apidefaults.Namespace},
 				NodeLabels:       Labels{Wildcard: []string{Wildcard}},
 				AppLabels:        Labels{Wildcard: []string{Wildcard}},
 				KubernetesLabels: Labels{Wildcard: []string{Wildcard}},

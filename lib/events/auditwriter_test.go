@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/session"
 	"github.com/gravitational/trace"
 
@@ -320,7 +320,7 @@ func newAuditWriterTest(t *testing.T, newStreamer newStreamerFn) *auditWriterTes
 	sid := session.NewID()
 	writer, err := NewAuditWriter(AuditWriterConfig{
 		SessionID:    sid,
-		Namespace:    defaults.Namespace,
+		Namespace:    apidefaults.Namespace,
 		RecordOutput: true,
 		Streamer:     streamer,
 		Context:      ctx,

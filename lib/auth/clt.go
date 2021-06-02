@@ -34,6 +34,7 @@ import (
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/client"
 	"github.com/gravitational/teleport/api/client/proto"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/lib/auth/u2f"
 	"github.com/gravitational/teleport/lib/defaults"
@@ -150,7 +151,7 @@ func NewHTTPClient(cfg client.Config, tls *tls.Config, params ...roundtrip.Clien
 		// custom DialContext overrides this DNS name to the real address.
 		// In addition this dialer tries multiple addresses if provided
 		DialContext:           dialer.DialContext,
-		ResponseHeaderTimeout: defaults.DefaultDialTimeout,
+		ResponseHeaderTimeout: apidefaults.DefaultDialTimeout,
 		TLSClientConfig:       tls,
 
 		// Increase the size of the connection pool. This substantially improves the

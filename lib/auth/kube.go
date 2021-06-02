@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
-	"github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/modules"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/tlsca"
@@ -127,7 +127,7 @@ func (s *Server) ProcessKubeCSR(req KubeCSR) (*KubeCSRResponse, error) {
 		return nil, trace.Wrap(err)
 	}
 	// Get the correct cert TTL based on roles.
-	ttl := roles.AdjustSessionTTL(defaults.CertDuration)
+	ttl := roles.AdjustSessionTTL(apidefaults.CertDuration)
 
 	userCA, err := s.Trust.GetCertAuthority(services.CertAuthID{
 		Type:       services.UserCA,

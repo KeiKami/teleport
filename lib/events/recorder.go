@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/session"
 
@@ -99,7 +100,7 @@ func (cfg *ForwardRecorderConfig) CheckAndSetDefaults() error {
 		return trace.BadParameter("missing parameter DataDir")
 	}
 	if cfg.Namespace == "" {
-		cfg.Namespace = defaults.Namespace
+		cfg.Namespace = apidefaults.Namespace
 	}
 	if cfg.ForwardTo == nil {
 		cfg.ForwardTo = &DiscardAuditLog{}

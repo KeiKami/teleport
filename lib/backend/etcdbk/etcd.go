@@ -28,8 +28,8 @@ import (
 	"strings"
 	"time"
 
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/backend"
-	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/tlsca"
 	"github.com/gravitational/teleport/lib/utils"
 
@@ -266,7 +266,7 @@ func (cfg *Config) Validate() error {
 		cfg.BufferSize = backend.DefaultBufferSize
 	}
 	if cfg.DialTimeout == 0 {
-		cfg.DialTimeout = defaults.DefaultDialTimeout
+		cfg.DialTimeout = apidefaults.DefaultDialTimeout
 	}
 	if cfg.PasswordFile != "" {
 		out, err := ioutil.ReadFile(cfg.PasswordFile)

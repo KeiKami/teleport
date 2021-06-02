@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/api/types"
 	apisshutils "github.com/gravitational/teleport/api/utils/sshutils"
 	"github.com/gravitational/teleport/lib"
@@ -307,11 +308,11 @@ func Init(cfg InitConfig, opts ...ServerOption) (*Server, error) {
 	}
 
 	// always create the default namespace
-	err = asrv.UpsertNamespace(services.NewNamespace(defaults.Namespace))
+	err = asrv.UpsertNamespace(services.NewNamespace(apidefaults.Namespace))
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	log.Infof("Created namespace: %q.", defaults.Namespace)
+	log.Infof("Created namespace: %q.", apidefaults.Namespace)
 
 	// always create a default admin role
 	defaultRole := services.NewAdminRole()
@@ -353,7 +354,7 @@ func Init(cfg InitConfig, opts ...ServerOption) (*Server, error) {
 			Version: services.V2,
 			Metadata: services.Metadata{
 				Name:      cfg.ClusterName.GetClusterName(),
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 			},
 			Spec: services.CertAuthoritySpecV2{
 				ClusterName:  cfg.ClusterName.GetClusterName(),
@@ -413,7 +414,7 @@ func Init(cfg InitConfig, opts ...ServerOption) (*Server, error) {
 			Version: services.V2,
 			Metadata: services.Metadata{
 				Name:      cfg.ClusterName.GetClusterName(),
-				Namespace: defaults.Namespace,
+				Namespace: apidefaults.Namespace,
 			},
 			Spec: services.CertAuthoritySpecV2{
 				ClusterName:  cfg.ClusterName.GetClusterName(),
@@ -975,7 +976,7 @@ func (i *Identity) SSHClientConfig() *ssh.ClientConfig {
 			ssh.PublicKeys(i.KeySigner),
 		},
 		HostKeyCallback: i.hostKeyCallback,
-		Timeout:         defaults.DefaultDialTimeout,
+		Timeout:         apidefaults.DefaultDialTimeout,
 	}
 }
 
@@ -1247,7 +1248,7 @@ func migrateRoleOptions(ctx context.Context, asrv *Server) error {
 		options := role.GetOptions()
 		if options.BPF == nil {
 			log.Debugf("Migrating role %v. Added default enhanced events.", role.GetName())
-			options.BPF = defaults.EnhancedEvents()
+			options.BPF = apidefaults.EnhancedEvents()
 		} else {
 			continue
 		}
