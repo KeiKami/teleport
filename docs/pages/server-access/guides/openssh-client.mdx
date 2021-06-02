@@ -43,9 +43,7 @@ For an OpenSSH client (`ssh`) to work with a Teleport proxy, two conditions must
 
 ### SSH proxy configuration
 
-To configure `ssh` to use a Teleport proxy on `proxy.example.com`, a user must
-update the `/etc/ssh/ssh_config` or `~/.ssh/config`. A few examples are shown
-below:
+To configure `ssh` to use a Teleport proxy on `proxy.example.com`, a user must update the `/etc/ssh/ssh_config` or `~/.ssh/config`. A few examples are shown below:
 
 ```bash
 # When "ssh db" is executed, OpenSSH will connect to proxy.example.com on port 3023
@@ -55,8 +53,7 @@ Host db
     ProxyJump proxy.example.com:3023
 ```
 
-The configuration above is all you need to `ssh root@db` if an SSH agent is running on a client computer. You can verify it by executing `ssh-add -L` right after `tsh login`. If the SSH agent is running, the cluster certificates will
-be printed to stdout.
+The configuration above is all you need to `ssh root@db` if an SSH agent is running on a client computer. You can verify it by executing `ssh-add -L` right after `tsh login`. If the SSH agent is running, the cluster certificates will be printed to stdout.
 
 If there is no ssh-agent available, the certificate must be passed to the OpenSSH client explicitly.
 
@@ -103,28 +100,7 @@ client:
 ssh jenkins.lab.example.com
 ```
 
-## OpenSSH hardening
-
-General ways to secure your SSH client and server connections are described below. 
-
-OpenSSH `sshd` server configuration settings are located in `/etc/ssh/sshd_config`.
-
-```bash
-sudo nano /etc/ssh/sshd_config
-```
-
-The following settings are often modified:
-
-```yaml
-# Limit max retries
-MaxAuthTries 3
-
-# Disable password authentication
-PasswordAuthentication no
-
-# Disable root access for openssh
-PermitRootLogin no
-```
+(!docs/pages/server-access/includes/ssh-hardening.mdx!)
 
 ## Connect to a Teleport Proxy Node
 
