@@ -22,6 +22,7 @@ import (
 
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/types/events"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/utils"
 
@@ -262,5 +263,5 @@ func getParticipants(sessionEvents []EventFields) []string {
 
 		}
 	}
-	return utils.Deduplicate(participants)
+	return apiutils.Deduplicate(participants)
 }

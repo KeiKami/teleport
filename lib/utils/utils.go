@@ -33,7 +33,9 @@ import (
 	"time"
 
 	"github.com/gravitational/teleport"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/modules"
+
 	"github.com/gravitational/trace"
 	"github.com/pborman/uuid"
 	log "github.com/sirupsen/logrus"
@@ -173,7 +175,7 @@ func AsBool(v string) bool {
 	if v == "" {
 		return false
 	}
-	out, _ := ParseBool(v)
+	out, _ := apiutils.ParseBool(v)
 	return out
 }
 
@@ -528,7 +530,7 @@ func CheckCertificateFormatFlag(s string) (string, error) {
 }
 
 // AddrsFromStrings returns strings list converted to address list
-func AddrsFromStrings(s Strings, defaultPort int) ([]NetAddr, error) {
+func AddrsFromStrings(s apiutils.Strings, defaultPort int) ([]NetAddr, error) {
 	addrs := make([]NetAddr, len(s))
 	for i, val := range s {
 		addr, err := ParseHostPortAddr(val, defaultPort)

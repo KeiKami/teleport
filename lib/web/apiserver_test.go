@@ -47,6 +47,7 @@ import (
 	"github.com/gravitational/teleport/api/client/webclient"
 	"github.com/gravitational/teleport/api/constants"
 	"github.com/gravitational/teleport/api/types"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/auth/mocku2f"
 	"github.com/gravitational/teleport/lib/auth/u2f"
@@ -1787,7 +1788,7 @@ func (s *WebSuite) searchEvents(c *C, clt *client.WebClient, query url.Values, f
 	var out eventsListGetResponse
 	c.Assert(json.Unmarshal(response.Bytes(), &out), IsNil)
 	for _, event := range out.Events {
-		if utils.SliceContainsStr(filter, event.GetType()) {
+		if apiutils.SliceContainsStr(filter, event.GetType()) {
 			result = append(result, event)
 		}
 	}

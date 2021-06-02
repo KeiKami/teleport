@@ -26,6 +26,7 @@ import (
 
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/types"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/events"
 	"github.com/gravitational/teleport/lib/services"
@@ -122,7 +123,7 @@ func oidcConfig(conn services.OIDCConnector) oidc.ClientConfig {
 			Secret: conn.GetClientSecret(),
 		},
 		// open id notifies provider that we are using OIDC scopes
-		Scope: utils.Deduplicate(append([]string{"openid", "email"}, conn.GetScope()...)),
+		Scope: apiutils.Deduplicate(append([]string{"openid", "email"}, conn.GetScope()...)),
 	}
 }
 

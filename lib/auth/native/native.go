@@ -29,6 +29,7 @@ import (
 
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/types/wrappers"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/sshutils"
 	"github.com/gravitational/teleport/lib/utils"
@@ -205,7 +206,7 @@ func (k *Keygen) GenerateHostCertWithoutValidation(c services.HostCertParams) ([
 		return nil, trace.BadParameter("no principals provided: %v, %v, %v",
 			c.HostID, c.NodeName, c.Principals)
 	}
-	principals = utils.Deduplicate(principals)
+	principals = apiutils.Deduplicate(principals)
 
 	// create certificate
 	validBefore := uint64(ssh.CertTimeInfinity)
@@ -368,5 +369,5 @@ func BuildPrincipals(hostID string, nodeName string, clusterName string, roles t
 	)
 
 	// deduplicate (in-case hostID and nodeName are the same) and return
-	return utils.Deduplicate(principals)
+	return apiutils.Deduplicate(principals)
 }

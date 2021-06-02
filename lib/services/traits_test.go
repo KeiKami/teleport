@@ -19,7 +19,7 @@ package services
 import (
 	"testing"
 
-	"github.com/gravitational/teleport/lib/utils"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -135,6 +135,6 @@ func TestTraitsToRoleMatchers(t *testing.T) {
 
 		// verify that the resulting matches, once deduplicated, are equivalent
 		// to the expected matches.
-		require.ElementsMatch(t, utils.Deduplicate(matches), tt.matches, tt.desc)
+		require.ElementsMatch(t, apiutils.Deduplicate(matches), tt.matches, tt.desc)
 	}
 }

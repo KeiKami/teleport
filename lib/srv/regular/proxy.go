@@ -29,6 +29,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/gravitational/teleport"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/reversetunnel"
 	"github.com/gravitational/teleport/lib/services"
@@ -366,7 +367,7 @@ func (t *proxySubsys) proxyToHost(
 			t.log.Errorf("Failed to parse address %q: %v.", servers[i].GetAddr(), err)
 			continue
 		}
-		if t.host == ip || t.host == servers[i].GetHostname() || utils.SliceContainsStr(ips, ip) {
+		if t.host == ip || t.host == servers[i].GetHostname() || apiutils.SliceContainsStr(ips, ip) {
 			if !specifiedPort || t.port == port {
 				server = servers[i]
 				matches++

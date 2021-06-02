@@ -29,6 +29,7 @@ import (
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/types"
 	"github.com/gravitational/teleport/api/types/wrappers"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/modules"
 	"github.com/gravitational/teleport/lib/tlsca"
@@ -418,7 +419,7 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 		}
 
-		r.SetLogins(condition, utils.Deduplicate(outLogins))
+		r.SetLogins(condition, apiutils.Deduplicate(outLogins))
 
 		// apply templates to kubernetes groups
 		inKubeGroups := r.GetKubeGroups(condition)
@@ -433,7 +434,7 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 			outKubeGroups = append(outKubeGroups, variableValues...)
 		}
-		r.SetKubeGroups(condition, utils.Deduplicate(outKubeGroups))
+		r.SetKubeGroups(condition, apiutils.Deduplicate(outKubeGroups))
 
 		// apply templates to kubernetes users
 		inKubeUsers := r.GetKubeUsers(condition)
@@ -448,7 +449,7 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 			outKubeUsers = append(outKubeUsers, variableValues...)
 		}
-		r.SetKubeUsers(condition, utils.Deduplicate(outKubeUsers))
+		r.SetKubeUsers(condition, apiutils.Deduplicate(outKubeUsers))
 
 		// apply templates to database names
 		inDbNames := r.GetDatabaseNames(condition)
@@ -463,7 +464,7 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 			outDbNames = append(outDbNames, variableValues...)
 		}
-		r.SetDatabaseNames(condition, utils.Deduplicate(outDbNames))
+		r.SetDatabaseNames(condition, apiutils.Deduplicate(outDbNames))
 
 		// apply templates to database users
 		inDbUsers := r.GetDatabaseUsers(condition)
@@ -478,7 +479,7 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 			outDbUsers = append(outDbUsers, variableValues...)
 		}
-		r.SetDatabaseUsers(condition, utils.Deduplicate(outDbUsers))
+		r.SetDatabaseUsers(condition, apiutils.Deduplicate(outDbUsers))
 
 		// apply templates to node labels
 		inLabels := r.GetNodeLabels(condition)
@@ -533,8 +534,8 @@ func ApplyTraits(r Role, traits map[string][]string) Role {
 			}
 			outCond.Roles = append(outCond.Roles, variableValues...)
 		}
-		outCond.Users = utils.Deduplicate(outCond.Users)
-		outCond.Roles = utils.Deduplicate(outCond.Roles)
+		outCond.Users = apiutils.Deduplicate(outCond.Users)
+		outCond.Roles = apiutils.Deduplicate(outCond.Roles)
 		outCond.Where = inCond.Where
 		r.SetImpersonateConditions(condition, outCond)
 	}
@@ -576,7 +577,7 @@ func applyLabelsTraits(inLabels Labels, traits map[string][]string) Labels {
 			}
 			values = append(values, valVars...)
 		}
-		outLabels[keyVars[0]] = utils.Deduplicate(values)
+		outLabels[keyVars[0]] = apiutils.Deduplicate(values)
 	}
 	return outLabels
 }
@@ -619,7 +620,7 @@ func ApplyValueTraits(val string, traits map[string][]string) ([]string, error) 
 func ruleScore(r *Rule) int {
 	score := 0
 	// wildcard rules are less specific
-	if utils.SliceContainsStr(r.Resources, Wildcard) {
+	if apiutils.SliceContainsStr(r.Resources, Wildcard) {
 		score -= 4
 	} else if len(r.Resources) == 1 {
 		// rules that match specific resource are more specific than
@@ -627,7 +628,7 @@ func ruleScore(r *Rule) int {
 		score += 2
 	}
 	// rules that have wildcard verbs are less specific
-	if utils.SliceContainsStr(r.Verbs, Wildcard) {
+	if apiutils.SliceContainsStr(r.Verbs, Wildcard) {
 		score -= 2
 	}
 	// rules that supply 'where' or 'actions' are more specific
@@ -1088,7 +1089,7 @@ func MatchLabels(selector Labels, target map[string]string) (bool, string, error
 			return false, fmt.Sprintf("no key match: '%v'", key), nil
 		}
 
-		if !utils.SliceContainsStr(selectorValues, Wildcard) {
+		if !apiutils.SliceContainsStr(selectorValues, Wildcard) {
 			result, err := utils.SliceMatchesRegex(targetVal, selectorValues)
 			if err != nil {
 				return false, "", trace.Wrap(err)
@@ -1315,7 +1316,7 @@ func (set RoleSet) GetLoginsForTTL(ttl time.Duration) (logins []string, matchedT
 			logins = append(logins, role.GetLogins(Allow)...)
 		}
 	}
-	return utils.Deduplicate(logins), matchedTTL
+	return apiutils.Deduplicate(logins), matchedTTL
 }
 
 // CheckAccessToRemoteCluster checks if a role has access to remote cluster. Deny rules are

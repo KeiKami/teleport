@@ -23,6 +23,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/gravitational/teleport/api/types"
+	apiutils "github.com/gravitational/teleport/api/utils"
 	"github.com/gravitational/teleport/lib/utils"
 	"github.com/gravitational/teleport/lib/utils/parse"
 
@@ -254,7 +255,7 @@ func ApplyAccessReview(req AccessRequest, rev types.AccessReview, author User) e
 	}
 
 	// role lists must be deduplicated and sorted
-	rev.Roles = utils.Deduplicate(rev.Roles)
+	rev.Roles = apiutils.Deduplicate(rev.Roles)
 	sort.Strings(rev.Roles)
 
 	// basic compatibility/sanity checks
@@ -929,7 +930,7 @@ func (m *RequestValidator) Validate(req AccessRequest) error {
 		// if no suggested reviewers were provided by the user then
 		// use the defaults suggested by the user's static roles.
 		if len(req.GetSuggestedReviewers()) == 0 {
-			req.SetSuggestedReviewers(utils.Deduplicate(m.SuggestedReviewers))
+			req.SetSuggestedReviewers(apiutils.Deduplicate(m.SuggestedReviewers))
 		}
 	}
 	return nil
@@ -947,7 +948,7 @@ func (m *RequestValidator) GetRequestableRoles() ([]string, error) {
 
 	var expanded []string
 	for _, role := range allRoles {
-		if n := role.GetName(); !utils.SliceContainsStr(m.user.GetRoles(), n) && m.CanRequestRole(n) {
+		if n := role.GetName(); !apiutils.SliceContainsStr(m.user.GetRoles(), n) && m.CanRequestRole(n) {
 			// user does not currently hold this role, and is allowed to request it.
 			expanded = append(expanded, n)
 		}
@@ -1117,7 +1118,7 @@ func (m *RequestValidator) SystemAnnotations() map[string][]string {
 	for k, va := range m.Annotations.Allow {
 		var filtered []string
 		for _, v := range va {
-			if !utils.SliceContainsStr(m.Annotations.Deny[k], v) {
+			if !apiutils.SliceContainsStr(m.Annotations.Deny[k], v) {
 				filtered = append(filtered, v)
 			}
 		}
