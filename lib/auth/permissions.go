@@ -385,6 +385,7 @@ func GetCheckerForBuiltinRole(clusterName string, recConfig types.SessionRecordi
 						services.NewRule(types.KindSessionRecordingConfig, services.RO()),
 						services.NewRule(services.KindClusterAuthPreference, services.RO()),
 						services.NewRule(types.KindDatabaseServer, services.RW()),
+						services.NewRule(types.KindSemaphore, services.RW()),
 					},
 				},
 			})

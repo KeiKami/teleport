@@ -451,11 +451,12 @@ func (s *Server) dispatch(sessionCtx *common.Session, streamWriter events.Stream
 		}, nil
 	case defaults.ProtocolMySQL:
 		return &mysql.Engine{
-			Auth:    auth,
-			Audit:   audit,
-			Context: s.closeContext,
-			Clock:   s.cfg.Clock,
-			Log:     sessionCtx.Log,
+			Auth:       auth,
+			Audit:      audit,
+			AuthClient: s.cfg.AuthClient,
+			Context:    s.closeContext,
+			Clock:      s.cfg.Clock,
+			Log:        sessionCtx.Log,
 		}, nil
 	}
 	return nil, trace.BadParameter("unsupported database protocol %q",

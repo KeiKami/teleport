@@ -18,8 +18,12 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 	"net"
+	"time"
 
+	"github.com/gravitational/teleport/api/types"
+	"github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/srv/db/common"
 	"github.com/gravitational/teleport/lib/srv/db/mysql/protocol"
@@ -44,6 +48,8 @@ type Engine struct {
 	Auth common.Auth
 	// Audit emits database access audit events.
 	Audit common.Audit
+	// AuthClient is the cluster auth server client.
+	AuthClient *auth.Client
 	// Context is the database server close context.
 	Context context.Context
 	// Clock is the clock interface.
@@ -145,12 +151,23 @@ func (e *Engine) connect(ctx context.Context, sessionCtx *common.Session) (*clie
 		return nil, trace.Wrap(err)
 	}
 	var password string
-	if sessionCtx.Server.IsRDS() {
+	switch {
+	case sessionCtx.Server.IsRDS():
 		password, err = e.Auth.GetRDSAuthToken(sessionCtx)
 		if err != nil {
 			return nil, trace.Wrap(err)
 		}
-	} else if sessionCtx.Server.IsCloudSQL() {
+	case sessionCtx.Server.IsCloudSQL():
+		lease, err := e.connectLock(ctx, sessionCtx)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
+		defer func() {
+			err := e.AuthClient.CancelSemaphoreLease(ctx, *lease)
+			if err != nil {
+				e.Log.WithError(err).Errorf("Failed to cancel lease: %v.", lease)
+			}
+		}()
 		password, err = e.Auth.GetCloudSQLAuthToken(ctx, sessionCtx)
 		if err != nil {
 			return nil, trace.Wrap(err)
@@ -168,6 +185,37 @@ func (e *Engine) connect(ctx context.Context, sessionCtx *common.Session) (*clie
 		return nil, trace.Wrap(err)
 	}
 	return conn, nil
+}
+
+func (e *Engine) connectLock(ctx context.Context, sessionCtx *common.Session) (*types.SemaphoreLease, error) {
+	retry, err := utils.NewLinear(utils.LinearConfig{
+		Step:  time.Second,
+		Max:   10 * time.Second,
+		Clock: e.Clock,
+	})
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	for {
+		semaphore := types.AcquireSemaphoreRequest{
+			SemaphoreKind: "gcp-mysql-token",
+			SemaphoreName: fmt.Sprintf("%v-%v", sessionCtx.Server.GetName(), sessionCtx.DatabaseUser),
+			MaxLeases:     1,
+			Expires:       e.Clock.Now().Add(time.Minute),
+		}
+		lease, err := e.AuthClient.AcquireSemaphore(ctx, semaphore)
+		if err == nil {
+			return lease, nil
+		}
+		e.Log.Debugf("Failed to acquire semaphore %v, will retry in %v: %v.",
+			semaphore.SemaphoreName, retry.Duration(), err)
+		select {
+		case <-retry.After():
+			retry.Inc()
+		case <-ctx.Done():
+			return nil, trace.BadParameter("context canceled")
+		}
+	}
 }
 
 // receiveFromClient relays protocol messages received from MySQL client
