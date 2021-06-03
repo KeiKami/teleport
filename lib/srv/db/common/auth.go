@@ -26,6 +26,7 @@ import (
 	"github.com/gravitational/teleport/api/client/proto"
 	libauth "github.com/gravitational/teleport/lib/auth"
 	"github.com/gravitational/teleport/lib/auth/native"
+	"github.com/gravitational/teleport/lib/defaults"
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/tlsca"
 	"github.com/gravitational/teleport/lib/utils"
@@ -36,10 +37,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/redshift"
 
 	gcpcredentials "cloud.google.com/go/iam/credentials/apiv1"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 	gcpcredentialspb "google.golang.org/genproto/googleapis/iam/credentials/v1"
 
 	"github.com/gravitational/trace"
 	"github.com/jonboulle/clockwork"
+	"github.com/pborman/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -141,9 +144,32 @@ func (a *dbAuth) GetRedshiftAuthToken(sessionCtx *Session) (string, string, erro
 	return *resp.DbUser, *resp.DbPassword, nil
 }
 
+func (a *dbAuth) getCloudSQLPassword(ctx context.Context, sessionCtx *Session) (string, error) {
+	service, err := sqladmin.NewService(ctx)
+	if err != nil {
+		return "", trace.Wrap(err)
+	}
+	token := uuid.New()
+	a.cfg.Log.Debugf("Updating GCP MySQL user password for %q.", sessionCtx.DatabaseUser)
+	_, err = service.Users.Update(
+		sessionCtx.Server.GetGCP().ProjectID,
+		sessionCtx.Server.GetGCP().InstanceID,
+		&sqladmin.User{
+			Password: token,
+		}).Name(sessionCtx.DatabaseUser).Host("%").Context(ctx).Do()
+	if err != nil {
+		return "", trace.Wrap(err)
+	}
+	a.cfg.Log.Debugf("Updated GCP MySQL user password for %q.", sessionCtx.DatabaseUser)
+	return token, nil
+}
+
 // GetCloudSQLAuthToken returns authorization token that will be used as a
 // password when connecting to Cloud SQL databases.
 func (a *dbAuth) GetCloudSQLAuthToken(ctx context.Context, sessionCtx *Session) (string, error) {
+	if sessionCtx.Server.GetProtocol() == defaults.ProtocolMySQL {
+		return a.getCloudSQLPassword(ctx, sessionCtx)
+	}
 	if a.cfg.GCPIAM == nil {
 		return "", trace.BadParameter("GCP IAM client is not initialized")
 	}

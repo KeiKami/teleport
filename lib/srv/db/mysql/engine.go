@@ -150,6 +150,11 @@ func (e *Engine) connect(ctx context.Context, sessionCtx *common.Session) (*clie
 		if err != nil {
 			return nil, trace.Wrap(err)
 		}
+	} else if sessionCtx.Server.IsCloudSQL() {
+		password, err = e.Auth.GetCloudSQLAuthToken(ctx, sessionCtx)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
 	}
 	// TODO(r0mant): Set CLIENT_INTERACTIVE flag on the client?
 	conn, err := client.Connect(sessionCtx.Server.GetURI(),

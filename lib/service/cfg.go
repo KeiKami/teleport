@@ -658,9 +658,9 @@ func (d *Database) Check() error {
 		// It's a relatively new feature so we'll be able to enable it once it
 		// expands to MySQL as well:
 		//   https://cloud.google.com/sql/docs/postgres/authentication
-		if d.Protocol != defaults.ProtocolPostgres {
-			return trace.BadParameter("Cloud SQL IAM authentication is currently supported only for PostgreSQL databases, can't use database %q with protocol %q", d.Name, d.Protocol)
-		}
+		// if d.Protocol != defaults.ProtocolPostgres {
+		// 	return trace.BadParameter("Cloud SQL IAM authentication is currently supported only for PostgreSQL databases, can't use database %q with protocol %q", d.Name, d.Protocol)
+		// }
 		// TODO(r0mant): See if we can download it automatically similar to RDS:
 		// https://cloud.google.com/sql/docs/postgres/instance-info#rest-v1beta4
 		if len(d.CACert) == 0 {

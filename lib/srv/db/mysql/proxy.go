@@ -174,7 +174,7 @@ func (p *Proxy) maybeReadProxyLine(conn *multiplexer.Conn) error {
 // waitForOK waits for OK_PACKET from the database service which indicates
 // that auth on the other side completed successfully.
 func (p *Proxy) waitForOK(server *server.Conn, serviceConn net.Conn) error {
-	err := serviceConn.SetReadDeadline(time.Now().Add(15 * time.Second))
+	err := serviceConn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	if err != nil {
 		return trace.Wrap(err)
 	}
