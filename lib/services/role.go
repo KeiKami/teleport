@@ -198,6 +198,7 @@ func RoleForUser(u User) Role {
 					NewRule(KindSession, RO()),
 					NewRule(KindTrustedCluster, RW()),
 					NewRule(KindEvent, RO()),
+					NewRule(types.KindClusterNetworkingConfig, RW()),
 				},
 			},
 		},
