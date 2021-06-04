@@ -34,7 +34,7 @@ import (
 
 	"github.com/aquasecurity/tracee/libbpfgo"
 	"github.com/gravitational/teleport"
-	apidefaults "github.com/gravitational/teleport/lib/defaults"
+	apidefaults "github.com/gravitational/teleport/api/defaults"
 	"github.com/gravitational/teleport/lib/events"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
