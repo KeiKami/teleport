@@ -18,24 +18,14 @@ package mongodb
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
 	"net"
-	"time"
 
 	"github.com/gravitational/teleport/lib/services"
 	"github.com/gravitational/teleport/lib/srv/db/common"
 	"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol"
 	"github.com/gravitational/teleport/lib/utils"
 
-	"go.mongodb.org/mongo-driver/mongo/address"
-	"go.mongodb.org/mongo-driver/mongo/description"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.mongodb.org/mongo-driver/x/mongo/driver"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/auth"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/ocsp"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 
 	"github.com/gravitational/trace"
 	"github.com/jonboulle/clockwork"
@@ -78,11 +68,7 @@ func (e *Engine) HandleConnection(ctx context.Context, sessionCtx *common.Sessio
 		return trace.Wrap(err, "error authorizing database access")
 	}
 	// Establish connection to the MongoDB server.
-	// serverConn, err := e.connect(ctx, sessionCtx)
-	// if err != nil {
-	// 	return trace.Wrap(err, "error connecting to the database")
-	// }
-	serverConn, err := e.connect3(ctx, sessionCtx)
+	serverConn, err := e.connect(ctx, sessionCtx)
 	if err != nil {
 		return trace.Wrap(err, "error connecting to the database")
 	}
@@ -133,148 +119,6 @@ func (e *Engine) checkConnectAccess(sessionCtx *common.Session) error {
 	}
 	return nil
 }
-
-type handshaker struct{}
-
-func (h *handshaker) GetHandshakeInformation(context.Context, address.Address, driver.Connection) (driver.HandshakeInformation, error) {
-	return driver.HandshakeInformation{}, nil
-}
-
-func (h *handshaker) FinishHandshake(context.Context, driver.Connection) error {
-	return nil
-}
-func (e *Engine) connect3(ctx context.Context, sessionCtx *common.Session) (driver.Connection, error) {
-	tlsConfig, err := e.Auth.GetTLSConfig(ctx, sessionCtx)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	connString, err := connstring.ParseAndValidate(sessionCtx.Server.GetURI())
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	top, err := topology.New(
-		topology.WithConnString(func(cs connstring.ConnString) connstring.ConnString {
-			return connString
-		}),
-		// topology.WithURI(func(string) string {
-		// 	return sessionCtx.Server.GetURI()
-		// }),
-		topology.WithServerSelectionTimeout(func(time.Duration) time.Duration {
-			return time.Second
-		}),
-		topology.WithServerOptions(func(so ...topology.ServerOption) []topology.ServerOption {
-			return append(so, topology.WithConnectionOptions(func(opts ...topology.ConnectionOption) []topology.ConnectionOption {
-				return append(opts,
-					topology.WithTLSConfig(func(*tls.Config) *tls.Config {
-						return tlsConfig
-					}),
-					topology.WithOCSPCache(func(ocsp.Cache) ocsp.Cache {
-						return ocsp.NewCache()
-					}),
-					topology.WithHandshaker(func(h topology.Handshaker) topology.Handshaker {
-						return auth.Handshaker(
-							&handshaker{},
-							&auth.HandshakeOptions{
-								Authenticator: &auth.MongoDBX509Authenticator{
-									User: "CN" + sessionCtx.DatabaseUser,
-								},
-							})
-					}),
-				)
-			}))
-		}),
-	)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	err = top.Connect()
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	//server, err := top.SelectServer(ctx, description.ReadPrefSelector(readpref.Primary()))
-	server, err := top.SelectServer(ctx, description.ReadPrefSelector(readpref.Secondary()))
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	fmt.Printf("=== SELECTED SERVER %#v ===\n", server)
-	conn, err := server.Connection(ctx)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	return conn, nil
-}
-
-// func (e *Engine) connect2(ctx context.Context, sessionCtx *common.Session) (driver.Connection, error) {
-// 	tlsConfig, err := e.Auth.GetTLSConfig(ctx, sessionCtx)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	server, err := topology.NewServer(
-// 		address.Address(sessionCtx.Server.GetURI()),
-// 		primitive.NewObjectID(),
-// 		topology.WithConnectionOptions(func(opts ...topology.ConnectionOption) []topology.ConnectionOption {
-// 			return append(opts,
-// 				topology.WithTLSConfig(func(*tls.Config) *tls.Config {
-// 					return tlsConfig
-// 				}),
-// 				topology.WithOCSPCache(func(ocsp.Cache) ocsp.Cache {
-// 					return ocsp.NewCache()
-// 				}),
-// 				topology.WithHandshaker(func(h topology.Handshaker) topology.Handshaker {
-// 					return auth.Handshaker(
-// 						&handshaker{},
-// 						&auth.HandshakeOptions{
-// 							Authenticator: &auth.MongoDBX509Authenticator{
-// 								User: "CN" + sessionCtx.DatabaseUser,
-// 							},
-// 						})
-// 				}),
-// 			)
-// 		}))
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	err = server.Connect(nil)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	fmt.Printf("==== SERVER DESCRIPTION %#v\n", server.Description())
-// 	conn, err := server.Connection(ctx)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	return conn, nil
-// }
-
-// // connect establishes connection to MongoDB database.
-// func (e *Engine) connect(ctx context.Context, sessionCtx *common.Session) (*tls.Conn, error) {
-// 	tlsConfig, err := e.Auth.GetTLSConfig(ctx, sessionCtx)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-
-// 	tlsConn, err := tls.Dial("tcp", sessionCtx.Server.GetURI(), tlsConfig)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	// MongoDB clients can connect to the database unauthenticated and then
-// 	// execute db.auth() command to authenticate. This would potentially allow
-// 	// the client to authenticate as a different user than what's encoded in
-// 	// the certificate.
-// 	//
-// 	// For this reason, run x509 authentication sequence ourselves - i.e.
-// 	// force-authenticate the connection as a user that's encoded in the
-// 	// certificate.
-// 	//
-// 	// This way, if the client executes db.auth() itself as a different user,
-// 	// they will be getting authorization errors because Mongo doesn't allow
-// 	// multiple authenticated users for the same session.
-// 	err = protocol.Authenticate(tlsConn, sessionCtx.DatabaseUser)
-// 	if err != nil {
-// 		return nil, trace.Wrap(err)
-// 	}
-// 	return tlsConn, nil
-// }
 
 // receiveFromClient relays protocol messages received from MongoDB client
 // to MongoDB database server.
@@ -393,7 +237,7 @@ func (e *Engine) receiveFromServer(serverConn driver.Connection, clientConn net.
 }
 
 func (e *Engine) replyError(clientConn net.Conn, replyTo protocol.Message, err error) {
-	errSend := protocol.ReplyError(clientConn, nil, err)
+	errSend := protocol.ReplyError(clientConn, replyTo, err)
 	if errSend != nil {
 		e.Log.WithError(errSend).Errorf("Failed to send error message to MongoDB client: %v.", err)
 	}
