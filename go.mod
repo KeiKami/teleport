@@ -92,7 +92,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20150808065054-e02fc20de94c // indirect
 	github.com/xeipuuv/gojsonschema v0.0.0-20151204154511-3988ac14d6f6 // indirect
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20201125193152-8a03d2e9614b
-	go.mongodb.org/mongo-driver v1.4.6
+	go.mongodb.org/mongo-driver v1.5.3
 	go.opencensus.io v0.22.5 // indirect
 	go.uber.org/atomic v1.7.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83

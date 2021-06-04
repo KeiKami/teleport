@@ -503,10 +503,12 @@ github.com/tstranex/u2f
 ## explicit
 github.com/vulcand/predicate
 github.com/vulcand/predicate/builder
-# github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
-github.com/xdg/scram
-# github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc
-github.com/xdg/stringprep
+# github.com/xdg-go/pbkdf2 v1.0.0
+github.com/xdg-go/pbkdf2
+# github.com/xdg-go/scram v1.0.2
+github.com/xdg-go/scram
+# github.com/xdg-go/stringprep v1.0.2
+github.com/xdg-go/stringprep
 # github.com/xeipuuv/gojsonpointer v0.0.0-20151027082146-e0fe6f683076
 ## explicit
 github.com/xeipuuv/gojsonpointer
@@ -516,6 +518,8 @@ github.com/xeipuuv/gojsonreference
 # github.com/xeipuuv/gojsonschema v0.0.0-20151204154511-3988ac14d6f6
 ## explicit
 github.com/xeipuuv/gojsonschema
+# github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d
+github.com/youmark/pkcs8
 # go.etcd.io/etcd v0.5.0-alpha.5.0.20201125193152-8a03d2e9614b
 ## explicit
 go.etcd.io/etcd/auth/authpb
@@ -537,7 +541,7 @@ go.etcd.io/etcd/raft/quorum
 go.etcd.io/etcd/raft/raftpb
 go.etcd.io/etcd/raft/tracker
 go.etcd.io/etcd/version
-# go.mongodb.org/mongo-driver v1.4.6
+# go.mongodb.org/mongo-driver v1.5.3
 ## explicit
 go.mongodb.org/mongo-driver/bson
 go.mongodb.org/mongo-driver/bson/bsoncodec
@@ -548,6 +552,8 @@ go.mongodb.org/mongo-driver/bson/primitive
 go.mongodb.org/mongo-driver/event
 go.mongodb.org/mongo-driver/internal
 go.mongodb.org/mongo-driver/mongo
+go.mongodb.org/mongo-driver/mongo/address
+go.mongodb.org/mongo-driver/mongo/description
 go.mongodb.org/mongo-driver/mongo/options
 go.mongodb.org/mongo-driver/mongo/readconcern
 go.mongodb.org/mongo-driver/mongo/readpref
@@ -557,11 +563,9 @@ go.mongodb.org/mongo-driver/version
 go.mongodb.org/mongo-driver/x/bsonx
 go.mongodb.org/mongo-driver/x/bsonx/bsoncore
 go.mongodb.org/mongo-driver/x/mongo/driver
-go.mongodb.org/mongo-driver/x/mongo/driver/address
 go.mongodb.org/mongo-driver/x/mongo/driver/auth
 go.mongodb.org/mongo-driver/x/mongo/driver/auth/internal/gssapi
 go.mongodb.org/mongo-driver/x/mongo/driver/connstring
-go.mongodb.org/mongo-driver/x/mongo/driver/description
 go.mongodb.org/mongo-driver/x/mongo/driver/dns
 go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt
 go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt/options

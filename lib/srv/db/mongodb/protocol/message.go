@@ -17,8 +17,11 @@ limitations under the License.
 package protocol
 
 import (
+	"bytes"
+	"context"
 	"io"
 
+	"go.mongodb.org/mongo-driver/x/mongo/driver"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/wiremessage"
 
 	"github.com/gravitational/trace"
@@ -54,6 +57,15 @@ func ReadMessage(reader io.Reader) (Message, error) {
 			raw:    payload,
 		}, nil
 	}
+}
+
+func ReadMessageFromServer(ctx context.Context, conn driver.Connection) (Message, error) {
+	var wm []byte
+	wm2, err := conn.ReadWireMessage(ctx, wm)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	return ReadMessage(bytes.NewReader(wm2))
 }
 
 func readHeaderAndPayload(reader io.Reader) (*MessageHeader, []byte, error) {

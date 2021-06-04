@@ -631,10 +631,10 @@ func (d *Database) Check() error {
 		return trace.BadParameter("unsupported database %q protocol %q, supported are: %v",
 			d.Name, d.Protocol, defaults.DatabaseProtocols)
 	}
-	if _, _, err := net.SplitHostPort(d.URI); err != nil {
-		return trace.BadParameter("invalid database %q address %q: %v",
-			d.Name, d.URI, err)
-	}
+	// if _, _, err := net.SplitHostPort(d.URI); err != nil {
+	// 	return trace.BadParameter("invalid database %q address %q: %v",
+	// 		d.Name, d.URI, err)
+	// }
 	if len(d.CACert) != 0 {
 		if _, err := tlsca.ParseCertificatePEM(d.CACert); err != nil {
 			return trace.BadParameter("provided database %q CA doesn't appear to be a valid x509 certificate: %v",
