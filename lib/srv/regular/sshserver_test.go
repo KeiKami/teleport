@@ -202,7 +202,7 @@ func newCustomFixture(t *testing.T, mutateCfg func(*auth.TestServerConfig), sshO
 
 	client, err := ssh.Dial("tcp", sshSrv.Addr(), cltConfig)
 	require.NoError(t, err)
-	t.Cleanup(func() { client.Close() })
+	t.Cleanup(func() { require.NoError(t, client.Close()) })
 	require.NoError(t, agent.ForwardToAgent(client, keyring))
 
 	return &sshTestFixture{
