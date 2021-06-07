@@ -117,7 +117,7 @@ func newCustomFixture(t *testing.T, mutateCfg func(*auth.TestServerConfig), sshO
 
 	testServer, err := auth.NewTestServer(serverCfg)
 	require.NoError(t, err)
-	t.Cleanup(func() { testServer.Shutdown(context.Background()) })
+	t.Cleanup(func() { require.NoError(t, testServer.Shutdown(context.Background())) })
 
 	certs, err := testServer.Auth().GenerateServerKeys(auth.GenerateServerKeysRequest{
 		HostID:   hostID,
